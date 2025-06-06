@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",          // let “@” start from the repo root
+    "paths": {
+      "@/*": ["src/*"]       // @/components/… → src/components/…
+    }
+  },
+  "include": ["src", "backend/db.js", "backend/routes", "backend/index.js"]
+}
