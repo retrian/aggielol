@@ -1,4 +1,4 @@
-// src/routes/players.js
+// backend/routes/players.js
 import { Router } from 'express';
 import { pool }   from '../../backend/db/pool.js';
 

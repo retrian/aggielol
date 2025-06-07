@@ -3,6 +3,7 @@
 import 'dotenv/config';
 import express from 'express';
 import cron from 'node-cron';
+import { pool } from './db/pool.js';
 
 import adminRouter from './routes/admin.js';
 import playersRouter from './routes/players.js';
@@ -14,6 +15,19 @@ import { syncAllAccounts } from './services/riotSync.js'; // adjust path if need
 
 const app = express();
 app.use(express.json());
+
+// Log and verify DATABASE_URL
+console.log('▶️ DATABASE_URL:', process.env.DATABASE_URL);
+
+// Test initial Postgres connection
+pool.connect()
+  .then(client => {
+    console.log('✅ Connected to Postgres');
+    client.release();
+  })
+  .catch(err => {
+    console.error('❌ Failed to connect to Postgres:', err);
+  });
 
 app.use('/api/admin', adminRouter);
 app.use('/api/teams', teamsRouter);

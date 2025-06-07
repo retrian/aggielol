@@ -1,4 +1,4 @@
-// File: src/routes/leaderboard.js
+// File: backend/routes/leaderboard.js
 
 import { Router } from 'express';
 import { pool } from '../../backend/db/pool.js';
