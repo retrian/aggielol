@@ -1,4 +1,4 @@
-/**  backend/verifyToken.js  */
+/**  backend/verifyToken.js  (CommonJS so it works in every Node setup) */
 import admin from "./firebaseAdmin.js";
 
 export async function verifyToken(req, res, next) {
