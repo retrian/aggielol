@@ -2,8 +2,11 @@ import axios from 'axios';
 
 // Use VITE_API_BASE in production, fallback to /api in development
 const API = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE || '/api'
+  baseURL: import.meta.env.VITE_API_BASE
+    ? `${import.meta.env.VITE_API_BASE}/api`
+    : '/api'
 });
+
 
 export const getTeams      = year => API.get(`/teams?year=${year}`);
 export const getTeamById   = id   => API.get(`/teams/${id}`);
