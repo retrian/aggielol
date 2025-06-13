@@ -9,6 +9,7 @@ import Leaderboard from "./pages/Leaderboard";
 import Schedule    from "./pages/Schedule";
 import Streams     from "./pages/Streams";
 import Profile     from "./pages/Profile";
+import AboutUs     from "./pages/AboutUs";
 
 import TeamDetail    from "./pages/TeamDetail";
 import PlayerProfile from "./pages/PlayerProfile";
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/leaderboard" element={<Leaderboard />} />
         <Route path="/schedule"    element={<Schedule />} />
         <Route path="/streams"     element={<Streams />} />
+        <Route path="/aboutus"     element={<AboutUs />} />
         <Route path="/profile"     element={<Profile />} />
       </Routes>
     </>

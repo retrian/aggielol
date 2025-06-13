@@ -1,7 +1,7 @@
 // src/pages/Players.jsx
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { ChevronDown, Users } from "lucide-react";
+import { ChevronDown, Users, Calendar } from "lucide-react";
 import PlayerCard from "@/components/PlayerCard";
 
 export default function Players() {
@@ -13,101 +13,110 @@ export default function Players() {
 
   const teamOrder = ["Maroon", "White", "Black", "Gray"];
 
+  // colour helper for team badges
+  const teamColors = {
+    Maroon:
+      "bg-red-900 text-white border-red-800",
+    White:
+      "bg-gray-100 text-gray-900 border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600",
+    Black:
+      "bg-gray-900 text-white border-gray-700",
+    Gray:
+      "bg-gray-600 text-white border-gray-500",
+    Unassigned:
+      "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900 dark:text-amber-100 dark:border-amber-700",
+  };
+
+  /* ------------------------------------------------------------------ */
+  /* load available seasons                                             */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
     fetch("/api/school_years")
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
       })
-      .then((data) => {
-        const sortedNames = data
+      .then((rows) => {
+        const yrNames = rows
           .map((row) => row.name)
-          .sort((a, b) => b.localeCompare(a));
-        setYears(sortedNames);
-        if (sortedNames.length > 0) {
-          setSelectedYear(sortedNames[0]);
-        }
+          .sort((a, b) => b.localeCompare(a)); // newest first
+        setYears(yrNames);
+        if (yrNames.length) setSelectedYear(yrNames[0]);
       })
       .catch((err) => {
-        console.error("Failed to fetch school_years:", err);
+        console.error(err);
         setError("Could not load seasons.");
       });
   }, []);
 
+  /* ------------------------------------------------------------------ */
+  /* load roster for selected season                                    */
+  /* ------------------------------------------------------------------ */
   useEffect(() => {
     if (!selectedYear) return;
-
     setLoading(true);
     setError(null);
 
     fetch(`/api/players?year=${encodeURIComponent(selectedYear)}`)
-      .then((res) => {
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        return res.json();
+      .then((r) => {
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+        return r.json();
       })
-      .then((dataArray) => {
-        console.log("Fetched /api/players data:", dataArray);
-
-        const processedRoster = dataArray.map((playerData) => {
-          if (playerData.player && playerData.accounts) {
-            const selectedAccount =
-              playerData.accounts[playerData.player.id % playerData.accounts.length];
-
-            const teamName =
-              playerData.stints && playerData.stints.length > 0
-                ? playerData.stints[0].team_name
-                : "Unassigned";
-
+      .then((rows) => {
+        // massage data into the flattened shape PlayerCard expects
+        const rosterData = rows.map((row) => {
+          if (row.player && row.accounts) {
+            const acct =
+              row.accounts[row.player.id % row.accounts.length];
+            const team =
+              row.stints?.[0]?.team_name ?? "Unassigned";
             return {
-              id: playerData.player.id,
-              display_name: playerData.player.display_name,
-              team_name: teamName,
-              iconId: selectedAccount.profile_icon_id,
-            };
-          } else {
-            return {
-              id: playerData.id,
-              display_name: playerData.display_name,
-              team_name: playerData.team_name,
-              iconId: playerData.iconId,
+              id: row.player.id,
+              display_name: row.player.display_name,
+              team_name: team,
+              iconId: acct.profile_icon_id,
             };
           }
+          // fallback (already flattened row)
+          return row;
         });
 
-        const uniqueRoster = processedRoster.filter(
-          (player, index, self) =>
-            index === self.findIndex(
-              (p) => p.id === player.id && p.display_name === player.display_name
+        // dedupe if API sent duplicates
+        const unique = rosterData.filter(
+          (p, i, self) =>
+            i ===
+            self.findIndex(
+              (q) => q.id === p.id && q.display_name === p.display_name
             )
         );
-
-        setRoster(uniqueRoster);
+        setRoster(unique);
       })
       .catch((err) => {
         console.error(err);
         setError(err.message || "Failed to load roster");
       })
-      .finally(() => {
-        setLoading(false);
-      });
+      .finally(() => setLoading(false));
   }, [selectedYear]);
 
-  const rosterByTeam = roster.reduce((acc, player) => {
-    const team = player.team_name || "Unassigned";
-    if (!acc[team]) acc[team] = [];
-    acc[team].push(player);
+  /* ------------------------------------------------------------------ */
+  /* derive roster grouped by team                                      */
+  /* ------------------------------------------------------------------ */
+  const rosterByTeam = roster.reduce((acc, p) => {
+    const t = p.team_name || "Unassigned";
+    (acc[t] ||= []).push(p);
     return acc;
   }, {});
-
   const teamCount = Object.keys(rosterByTeam).length;
 
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, []);
+  /* ensure page always starts at top */
+  useEffect(() => window.scrollTo(0, 0), []);
 
+  /* ================================================================== */
+  /* RENDER                                                             */
+  /* ================================================================== */
   return (
     <main>
-      {/* Hero Section */}
+      {/* ---------------------------------------------------------------- Hero */}
       <section
         className="relative h-screen flex items-center justify-center bg-fixed bg-center bg-cover"
         style={{ backgroundImage: "url('/assets/hero-bg.webp')" }}
@@ -128,19 +137,25 @@ export default function Players() {
 
           <div className="mt-12 grid grid-cols-3 gap-8 max-w-lg mx-auto">
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">{roster.length}</div>
+              <div className="text-3xl font-bold text-white">
+                {roster.length}
+              </div>
               <div className="text-sm text-white/70 uppercase tracking-wider">
                 Active Players
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">{years.length}</div>
+              <div className="text-3xl font-bold text-white">
+                {years.length}
+              </div>
               <div className="text-sm text-white/70 uppercase tracking-wider">
                 Seasons
               </div>
             </div>
             <div className="text-center">
-              <div className="text-3xl font-bold text-white">{teamCount}</div>
+              <div className="text-3xl font-bold text-white">
+                {teamCount}
+              </div>
               <div className="text-sm text-white/70 uppercase tracking-wider">
                 Teams
               </div>
@@ -156,117 +171,304 @@ export default function Players() {
         </motion.div>
       </section>
 
-      {/* Year Selector Section */}
-      <section className="py-20 bg-white">
-        <div className="max-w-4xl mx-auto px-6 text-center">
-          <h2 className="text-4xl font-bold mb-4 text-[#500000]">
-            Choose Your Era
-          </h2>
-          <p className="text-gray-600 mb-12">
-            Explore rosters from different competitive seasons
-          </p>
+      {/* ---------------------------------------------------- Season / Year picker */}
+      <section className="py-16 bg-white">
+        <div className="max-w-4xl mx-auto px-6">
+          <motion.div
+            className="text-center mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            viewport={{ once: true }}
+          >
+            <div className="inline-flex items-center gap-3 mb-4">
+              <Calendar className="w-8 h-8 text-[#500000] dark:text-[#b75b5b]" />
+              <h2 className="text-4xl font-bold text-[#500000] dark:text-white">
+                Select Season
+              </h2>
+            </div>
+            <p className="text-gray-600 dark:text-gray-300 text-lg">
+              Browse through different competitive seasons
+            </p>
+          </motion.div>
 
-          <div className="relative max-w-md mx-auto">
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(e.target.value)}
-              className="w-full appearance-none rounded-2xl border-2 border-gray-300 bg-white py-4 pl-6 pr-12 text-lg font-semibold text-gray-900 shadow-lg transition-all duration-300 hover:shadow-xl focus:border-[#500000] focus:outline-none focus:ring-4 focus:ring-[#500000]/20"
-            >
-              {years.map((yr, idx) => (
-                <option key={yr} value={yr} className="font-semibold">
-                  {yr} {idx === 0 ? "(Current)" : ""}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="pointer-events-none absolute right-5 top-1/2 h-6 w-6 -translate-y-1/2 text-gray-500" />
-          </div>
+          <motion.div
+            className="relative max-w-sm mx-auto"
+            initial={{ opacity: 0, scale: 0.95 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            viewport={{ once: true }}
+          >
+            <div className="relative group">
+              <select
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(e.target.value)}
+                className="
+                  w-full appearance-none
+                  bg-white dark:bg-gray-800
+                  text-gray-900 dark:text-gray-100
+                  border-2 border-gray-200 dark:border-gray-600
+                  rounded-xl px-6 py-4 text-lg font-semibold
+                  shadow-sm transition-all duration-300
+                  hover:border-[#500000] dark:hover:border-[#b75b5b]
+                  focus:outline-none focus:ring-4
+                  focus:ring-[#500000]/10 dark:focus:ring-[#b75b5b]/20
+                  cursor-pointer
+                "
+              >
+                {years.map((yr, idx) => (
+                  <option
+                    key={yr}
+                    value={yr}
+                    className="
+                      bg-white dark:bg-gray-800
+                      text-gray-900 dark:text-gray-100
+                    "
+                  >
+                    {yr} {idx === 0 ? "(Current Season)" : ""}
+                  </option>
+                ))}
+              </select>
+
+              {/* chevron */}
+              <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <ChevronDown
+                  className="
+                    w-5 h-5 text-gray-500 dark:text-gray-400
+                    group-hover:text-[#500000] dark:group-hover:text-[#b75b5b]
+                    transition-colors duration-200
+                  "
+                />
+              </div>
+            </div>
+
+            {/* subtle acccent bar */}
+            <div
+              className="
+                absolute -bottom-2 left-1/2 -translate-x-1/2
+                w-12 h-1 rounded-full
+                bg-[#500000] dark:bg-[#b75b5b]
+                opacity-20
+              "
+            />
+          </motion.div>
 
           {error === "Could not load seasons." && (
-            <p className="mt-4 text-sm text-red-600">
-              Failed to load available seasons.
-            </p>
+            <motion.div
+              className="mt-6 text-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <div
+                className="
+                  inline-flex items-center gap-2 px-4 py-2
+                  bg-red-50 dark:bg-red-900/20
+                  text-red-700 dark:text-red-400
+                  rounded-lg text-sm
+                "
+              >
+                <span>⚠️</span>
+                <span>Unable to load available seasons</span>
+              </div>
+            </motion.div>
           )}
         </div>
       </section>
 
-      {/* Players grouped by Team Section */}
-      <section className="py-20 bg-gray-100">
-        <div className="max-w-7xl mx-auto px-6 space-y-12">
+      {/* ----------------------------------------------------------- Players list */}
+      <section className="py-20 bg-white dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* loading / errors / empty states collapse to one of three blocks */}
           {loadingRoster && (
-            <div className="text-center py-24">
-              <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#500000] border-t-transparent mx-auto"></div>
-              <p className="mt-4 text-gray-600">
-                Loading roster for {selectedYear}…
+            <motion.div
+              className="text-center py-24"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+            >
+              <div className="relative">
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#500000]/20 dark:border-[#b75b5b]/20 border-t-[#500000] dark:border-t-[#b75b5b] mx-auto"></div>
+                <div className="absolute inset-0 rounded-full bg-[#500000]/5 dark:bg-[#b75b5b]/10"></div>
+              </div>
+              <p className="mt-6 text-gray-600 dark:text-gray-300 font-medium">
+                Loading {selectedYear} roster...
               </p>
-            </div>
+            </motion.div>
           )}
 
           {!loadingRoster && error && (
-            <div className="text-center py-24 text-red-600">
-              <p>Sorry, failed to load roster for {selectedYear}.</p>
-              <p>Error: {error}</p>
-            </div>
+            <motion.div
+              className="text-center py-24"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="max-w-md mx-auto">
+                <div className="w-20 h-20 mx-auto mb-6 rounded-full bg-red-100 dark:bg-red-900/20 flex items-center justify-center">
+                  <span className="text-3xl">⚠️</span>
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-2">
+                  Failed to Load Roster
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                  We couldn't load the roster for {selectedYear}
+                </p>
+                <div className="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-400 rounded-lg text-sm inline-block">
+                  {error}
+                </div>
+              </div>
+            </motion.div>
           )}
 
           {!loadingRoster && !error && roster.length === 0 && (
-            <div className="text-center py-24">
-              <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-200 flex items-center justify-center">
-                <Users className="w-10 h-10 text-gray-400" />
+            <motion.div
+              className="text-center py-24"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+            >
+              <div className="max-w-md mx-auto">
+                <div className="w-24 h-24 mx-auto mb-6 rounded-full bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                  <Users className="w-12 h-12 text-gray-400 dark:text-gray-500" />
+                </div>
+                <h3 className="text-2xl font-semibold text-gray-900 dark:text-white mb-3">
+                  No Players Found
+                </h3>
+                <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                  We don't have roster data for <strong>{selectedYear}</strong>{" "}
+                  yet.
+                  <br />
+                  Try selecting a different season or check back later.
+                </p>
               </div>
-              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
-                No Players Found
-              </h3>
-              <p className="text-gray-500 max-w-md mx-auto">
-                We don't have any data for {selectedYear} yet. Check back soon or
-                choose a different season.
-              </p>
-            </div>
+            </motion.div>
           )}
 
+          {/* -------------------------------------- main roster grid when data ok */}
           {!loadingRoster && !error && roster.length > 0 && (
-            <>
-              <h2 className="text-4xl font-bold text-center mb-8 text-[#500000]">
-                {selectedYear} Roster
-              </h2>
-
-              {teamOrder.map((teamName) => {
-                const playersForTeam = rosterByTeam[teamName];
-                if (!playersForTeam || playersForTeam.length === 0) {
-                  return null;
-                }
-                return (
-                  <div key={teamName}>
-                    <h3 className="text-3xl font-semibold mb-6">{teamName}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-                      {playersForTeam.map((player) => (
-                        <PlayerCard
-                          key={player.id}
-                          name={player.display_name}
-                          iconId={player.iconId}
-                        />
-                      ))}
-                    </div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6 }}
+            >
+              {/* season header */}
+              <div className="text-center mb-16">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6 }}
+                >
+                  <h2 className="text-5xl font-bold text-[#500000] dark:text-white mb-3">
+                    {selectedYear}
+                  </h2>
+                  <div className="flex items-center justify-center gap-2 text-gray-600 dark:text-gray-300">
+                    <Users className="w-5 h-5" />
+                    <span className="text-lg">
+                      {roster.length} Players • {teamCount} Teams
+                    </span>
                   </div>
-                );
-              })}
+                  <div className="w-24 h-1 bg-[#500000] dark:bg-[#b75b5b] mx-auto mt-4 rounded-full"></div>
+                </motion.div>
+              </div>
 
-              {Object.keys(rosterByTeam)
-                .filter((teamName) => !teamOrder.includes(teamName))
-                .map((teamName) => (
-                  <div key={teamName}>
-                    <h3 className="text-3xl font-semibold mb-6">{teamName}</h3>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                      {rosterByTeam[teamName].map((player) => (
-                        <PlayerCard
-                          key={player.id}
-                          name={player.display_name}
-                          iconId={player.iconId}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ))}
-            </>
+              {/* each team */}
+              <div className="space-y-16">
+                {teamOrder.map((team) => {
+                  const players = rosterByTeam[team];
+                  if (!players?.length) return null;
+
+                  return (
+                    <motion.div
+                      key={team}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                      viewport={{ once: true }}
+                    >
+                      {/* team header */}
+                      <div className="flex items-center gap-4 mb-8">
+                        <div
+                          className={`px-6 py-3 rounded-xl border-2 ${
+                            teamColors[team] || teamColors.Unassigned
+                          }`}
+                        >
+                          <h3 className="text-2xl font-bold">{team}</h3>
+                        </div>
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                          {players.length} players
+                        </div>
+                      </div>
+
+                      {/* players grid */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                        {players.map((p, idx) => (
+                          <motion.div
+                            key={p.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{
+                              duration: 0.4,
+                              delay: idx * 0.05,
+                            }}
+                            viewport={{ once: true }}
+                          >
+                            <PlayerCard
+                              name={p.display_name}
+                              iconId={p.iconId}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  );
+                })}
+
+                {/* any other ad-hoc teams */}
+                {Object.keys(rosterByTeam)
+                  .filter((t) => !teamOrder.includes(t))
+                  .map((t) => (
+                    <motion.div
+                      key={t}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6 }}
+                      viewport={{ once: true }}
+                    >
+                      <div className="flex items-center gap-4 mb-8">
+                        <div
+                          className={`px-6 py-3 rounded-xl border-2 ${
+                            teamColors[t] || teamColors.Unassigned
+                          }`}
+                        >
+                          <h3 className="text-2xl font-bold">{t}</h3>
+                        </div>
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
+                        <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                          {rosterByTeam[t].length} players
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {rosterByTeam[t].map((p, idx) => (
+                          <motion.div
+                            key={p.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            whileInView={{ opacity: 1, y: 0 }}
+                            transition={{
+                              duration: 0.4,
+                              delay: idx * 0.05,
+                            }}
+                            viewport={{ once: true }}
+                          >
+                            <PlayerCard
+                              name={p.display_name}
+                              iconId={p.iconId}
+                            />
+                          </motion.div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  ))}
+              </div>
+            </motion.div>
           )}
         </div>
       </section>

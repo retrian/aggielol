@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { Users, Trophy, CalendarClock, PlayCircle, TrendingUp } from "lucide-react";
+import { Users, Trophy, CalendarClock, PlayCircle, TrendingUp, Info } from "lucide-react";
 
 const features = [
   { icon: Users, title: "Teams", desc: "Meet our competitive rosters for every year.", href: "/teams" },
@@ -12,6 +12,7 @@ const features = [
   { icon: CalendarClock, title: "Schedule", desc: "Never miss a scrim, match, or IRL event.", href: "/schedule" },
   { icon: PlayCircle, title: "Watch Live", desc: "Catch our streams & VODs here.", href: "/streams" },
   { icon: TrendingUp, title: "Predictions", desc: "Bet AMEpoints on match outcomes.", href: "/predictions" },
+  { icon: Info,        title: "About Us",    desc: "Who we are and what we do."},   
 ];
 
 const stats = [

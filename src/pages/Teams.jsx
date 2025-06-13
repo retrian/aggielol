@@ -18,127 +18,131 @@ export default function Teams() {
   }, []);
 
   return (
-    <main>
+    <main className="min-h-screen">
       {/* Hero Section */}
-      <section
-        className="relative h-screen flex items-center justify-center bg-fixed bg-center bg-cover"
-        style={{ backgroundImage: "url('/assets/teams-hero.jpg')" }}
-      >
-        <div className="absolute inset-0 bg-[#500000]/90" />
-        <motion.div
-          className="relative z-10 text-center px-6"
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-        >
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight">
-            OUR TEAMS
-          </h1>
-          <p className="mt-4 text-xl text-white">
-            Meet every Aggie roster, from our varsity to our development teams.
-          </p>
-        </motion.div>
-        <motion.div
-          className="absolute bottom-20"
-          animate={{ y: [0, 15, 0] }}
-          transition={{ repeat: Infinity, duration: 2 }}
-        >
-          <ChevronDown className="w-10 h-10 text-white" />
-        </motion.div>
+      <section className="relative h-screen flex items-center justify-center bg-gradient-to-br from-[#500000] to-[#700000]">
+        <div className="text-center px-6 max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
+              OUR TEAMS
+            </h1>
+          </motion.div>
+        </div>
+        
+        {/* Simple scroll indicator */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+          <ChevronDown className="w-8 h-8 text-white opacity-60" />
+        </div>
       </section>
 
       {/* Varsity Spotlight */}
       <section className="py-24 bg-white">
-        <motion.div
-          className="max-w-6xl mx-auto px-6"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <div className="bg-gradient-to-r from-[#500000] to-[#7f0000] rounded-3xl p-16 shadow-2xl text-white flex flex-col md:flex-row items-center gap-10">
-            <div className="flex-1 z-10">
-              <h2 className="text-6xl md:text-7xl font-black mb-4">Varsity Team</h2>
-              <p className="text-xl mb-6">
-                Our premier maroon roster, competing at the highest level. Masters+ level team.
-              </p>
-              <Link
-                to="/teams/varsity"
-                className="inline-block bg-white text-[#500000] font-bold text-lg py-4 px-10 rounded-2xl hover:bg-gray-100 transition"
-              >
-                View Varsity →
-              </Link>
+        <div className="max-w-6xl mx-auto px-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            viewport={{ once: true }}
+            className="bg-white rounded-2xl shadow-xl p-12 border border-gray-100"
+          >
+            <div className="flex flex-col lg:flex-row items-center gap-16">
+              {/* Left content */}
+              <div className="flex-1 text-center lg:text-left">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6">
+                  Team Maroon
+                </h2>
+                <p className="text-xl text-gray-600 mb-10 leading-relaxed max-w-lg">
+                  Our premier varsity roster, competing at the highest level. 
+                  Masters+ level team representing Texas A&M.
+                </p>
+                <Link
+                  to="/teams/varsity"
+                  className="inline-flex items-center gap-2 bg-[#500000] text-white font-semibold px-8 py-4 rounded-lg hover:bg-[#600000] transition-colors shadow-lg hover:shadow-xl"
+                >
+                  View Roster →
+                </Link>
+              </div>
+              
+              {/* Right visual */}
+              <div className="flex-shrink-0">
+                <div className="w-56 h-56 bg-gradient-to-br from-[#500000] to-[#700000] rounded-2xl shadow-xl">
+                </div>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
       </section>
 
-      {/* Development Squads */}
-      <section className="py-20 bg-white">
-        <motion.div
-          className="max-w-7xl mx-auto px-6"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={{ hidden: {}, visible: { transition: { staggerChildren: 0.2 } } }}
-        >
-          <h2 className="text-4xl font-bold text-center mb-12 text-[#500000]">
-            Other Rosters
-          </h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      {/* Development Teams */}
+      <section className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-6">
+          {/* Section Header */}
+          <div className="text-center mb-35">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-300"></div>
+              </div>
+              <div className="relative flex justify-center">
+                <span className="bg-white px-8 text-3xl md:text-4xl font-bold text-gray-900">
+                  Development Teams
+                </span>
+              </div>
+            </div>
+            <p className="text-lg text-gray-600 mt-6 max-w-2xl mx-auto">
+              Structured progression teams designed to develop players at every skill level
+            </p>
+          </div>
+
+          {/* Teams Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
             {teams
               .filter((team) => team.name !== "Varsity")
               .map((team, idx) => (
                 <motion.div
                   key={team.name}
-                  className="bg-gray-50 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-0"
-                  whileHover={{ scale: 1.03 }}
-                  initial={{ opacity: 0, y: 30 }}
+                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6 }}
+                  transition={{ duration: 0.4, delay: idx * 0.1 }}
+                  viewport={{ once: true }}
+                  className="bg-white rounded-xl shadow-lg border border-gray-100 p-10 hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                 >
-                  <div className="flex justify-center mb-4">
+                  {/* Team color indicator */}
+                  <div className="flex items-center justify-center mb-8">
                     <div
-                      className="w-16 h-16 rounded-full border-2 border-gray-300"
-                      style={{ backgroundColor: team.color }}
-                    />
+                      className="w-24 h-24 rounded-full border-4 shadow-lg"
+                      style={{ 
+                        backgroundColor: team.color,
+                        borderColor: team.color === '#FFFFFF' ? '#e5e5e5' : team.color
+                      }}
+                    >
+                    </div>
                   </div>
-                  <h3 className="text-2xl font-semibold text-gray-900 mb-2 text-center">
+
+                  <h3 className="text-2xl font-bold text-gray-900 text-center mb-4">
                     {team.name}
                   </h3>
-                  <p className="text-gray-600 text-center mb-6">{team.desc}</p>
+                  
+                  <p className="text-gray-600 text-center mb-10 min-h-[48px] leading-relaxed">
+                    {team.desc}
+                  </p>
+
                   <div className="text-center">
-                    <Link to={team.href} className="inline-block text-[#500000] font-medium">
-                      View Roster →
+                    <Link
+                      to={team.href}
+                      className="inline-flex items-center gap-2 text-[#500000] font-semibold hover:text-[#600000] transition-colors text-lg"
+                    >
+                      View Roster
+                      <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
                     </Link>
                   </div>
                 </motion.div>
               ))}
           </div>
-        </motion.div>
-      </section>
-
-      {/* Apply Now Section */}
-      <section className="py-20 bg-[#500000]">
-        <motion.div
-          className="max-w-4xl mx-auto px-6 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <h2 className="text-4xl md:text-5xl font-black text-white mb-4">
-            Interested in joining?
-          </h2>
-          <p className="text-lg text-gray-200 mb-8">
-            Apply here when applications are opened (see Discord for tryout announcements) !
-          </p>
-          <Link
-            to="/apply"
-            className="bg-white text-[#500000] font-bold text-lg py-4 px-10 rounded-2xl hover:bg-gray-100 transition">
-            Apply Now →
-          </Link>
-        </motion.div>
+        </div>
       </section>
     </main>
   );
