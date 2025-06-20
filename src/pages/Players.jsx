@@ -4,32 +4,52 @@ import { motion } from "framer-motion";
 import { ChevronDown, Users, Calendar } from "lucide-react";
 import PlayerCard from "@/components/PlayerCard";
 
+/* pixel height of the navbar (adjust if you change Navbar padding) */
+const NAVBAR_H = 72;
+
+/* ---------------- helper to flatten one API row -------------------- */
+function flattenPlayerRow(row) {
+  if (row.player && row.accounts) {
+    const acct = row.accounts[row.player.id % row.accounts.length];
+    const team = row.stints?.[0]?.team_name ?? "Unassigned";
+    return {
+      id: row.player.id,
+      display_name: row.player.display_name,
+      team_name: team,
+      iconId: acct.profile_icon_id,
+    };
+  }
+  return row;
+}
+
 export default function Players() {
+  /* ---------------- state ------------------------------------------ */
   const [years, setYears] = useState([]);
   const [selectedYear, setSelectedYear] = useState("");
   const [roster, setRoster] = useState([]);
-  const [loadingRoster, setLoading] = useState(false);
+  const [loadingRoster, setLoadingRoster] = useState(false);
+  const [loadingTotals, setLoadingTotals] = useState(true);
   const [error, setError] = useState(null);
+
+  const [totalPlayers, setTotalPlayers] = useState(0);
+  const [totalTeams, setTotalTeams] = useState(0);
 
   const teamOrder = ["Maroon", "White", "Black", "Gray"];
 
-  // colour helper for team badges
+  /* ---------------- colour helper ---------------------------------- */
   const teamColors = {
-    Maroon:
-      "bg-red-900 text-white border-red-800",
+    Maroon: "bg-red-900 text-white border-red-800",
     White:
       "bg-gray-100 text-gray-900 border-gray-300 dark:bg-gray-800 dark:text-white dark:border-gray-600",
-    Black:
-      "bg-gray-900 text-white border-gray-700",
-    Gray:
-      "bg-gray-600 text-white border-gray-500",
+    Black: "bg-gray-900 text-white border-gray-700",
+    Gray: "bg-gray-600 text-white border-gray-500",
     Unassigned:
       "bg-amber-100 text-amber-900 border-amber-300 dark:bg-amber-900 dark:text-amber-100 dark:border-amber-700",
   };
 
-  /* ------------------------------------------------------------------ */
-  /* load available seasons                                             */
-  /* ------------------------------------------------------------------ */
+  /* ==================================================================
+     1.  Fetch list of seasons
+  ================================================================== */
   useEffect(() => {
     fetch("/api/school_years")
       .then((r) => {
@@ -42,6 +62,7 @@ export default function Players() {
           .sort((a, b) => b.localeCompare(a)); // newest first
         setYears(yrNames);
         if (yrNames.length) setSelectedYear(yrNames[0]);
+        calculateTotals(yrNames);
       })
       .catch((err) => {
         console.error(err);
@@ -49,12 +70,41 @@ export default function Players() {
       });
   }, []);
 
-  /* ------------------------------------------------------------------ */
-  /* load roster for selected season                                    */
-  /* ------------------------------------------------------------------ */
+  /* ---------------- helper: fetch every season, dedupe ------------- */
+  function calculateTotals(yearList) {
+    if (!yearList.length) {
+      setLoadingTotals(false);
+      return;
+    }
+    setLoadingTotals(true);
+
+    Promise.all(
+      yearList.map((yr) =>
+        fetch(`/api/players?year=${encodeURIComponent(yr)}`)
+          .then((r) => (r.ok ? r.json() : []))
+          .catch(() => [])
+      )
+    )
+      .then((allSeasons) => {
+        const idSet = new Set();
+        const teamSet = new Set();
+        allSeasons.flat().forEach((row) => {
+          const p = flattenPlayerRow(row);
+          idSet.add(p.id);
+          teamSet.add(p.team_name ?? "Unassigned");
+        });
+        setTotalPlayers(idSet.size);
+        setTotalTeams(teamSet.size);
+      })
+      .finally(() => setLoadingTotals(false));
+  }
+
+  /* ==================================================================
+     2.  Fetch roster for selected season
+  ================================================================== */
   useEffect(() => {
     if (!selectedYear) return;
-    setLoading(true);
+    setLoadingRoster(true);
     setError(null);
 
     fetch(`/api/players?year=${encodeURIComponent(selectedYear)}`)
@@ -63,65 +113,48 @@ export default function Players() {
         return r.json();
       })
       .then((rows) => {
-        // massage data into the flattened shape PlayerCard expects
-        const rosterData = rows.map((row) => {
-          if (row.player && row.accounts) {
-            const acct =
-              row.accounts[row.player.id % row.accounts.length];
-            const team =
-              row.stints?.[0]?.team_name ?? "Unassigned";
-            return {
-              id: row.player.id,
-              display_name: row.player.display_name,
-              team_name: team,
-              iconId: acct.profile_icon_id,
-            };
-          }
-          // fallback (already flattened row)
-          return row;
-        });
-
-        // dedupe if API sent duplicates
-        const unique = rosterData.filter(
-          (p, i, self) =>
-            i ===
-            self.findIndex(
-              (q) => q.id === p.id && q.display_name === p.display_name
-            )
-        );
+        const unique = rows
+          .map(flattenPlayerRow)
+          .filter(
+            (p, i, self) => i === self.findIndex((q) => q.id === p.id)
+          );
         setRoster(unique);
       })
       .catch((err) => {
         console.error(err);
         setError(err.message || "Failed to load roster");
       })
-      .finally(() => setLoading(false));
+      .finally(() => setLoadingRoster(false));
   }, [selectedYear]);
 
-  /* ------------------------------------------------------------------ */
-  /* derive roster grouped by team                                      */
-  /* ------------------------------------------------------------------ */
+  /* ---------------- group roster by team --------------------------- */
   const rosterByTeam = roster.reduce((acc, p) => {
-    const t = p.team_name || "Unassigned";
-    (acc[t] ||= []).push(p);
+    (acc[p.team_name || "Unassigned"] ||= []).push(p);
     return acc;
   }, {});
   const teamCount = Object.keys(rosterByTeam).length;
 
-  /* ensure page always starts at top */
+  /* scroll to top on mount */
   useEffect(() => window.scrollTo(0, 0), []);
 
-  /* ================================================================== */
-  /* RENDER                                                             */
-  /* ================================================================== */
+  /* ==================================================================
+     RENDER
+  ================================================================== */
   return (
     <main>
-      {/* ---------------------------------------------------------------- Hero */}
+      {/* ----------------------------------------------------------- HERO */}
       <section
-        className="relative h-screen flex items-center justify-center bg-fixed bg-center bg-cover"
-        style={{ backgroundImage: "url('/assets/hero-bg.webp')" }}
+        className="
+          relative flex flex-col items-center justify-center
+          bg-fixed bg-center bg-cover
+        "
+        style={{
+          backgroundImage: "url('/assets/hero-bg.webp')",
+          minHeight: `calc(100dvh - ${NAVBAR_H}px)`,
+        }}
       >
         <div className="absolute inset-0 bg-[#500000]/90" />
+
         <motion.div
           className="relative z-10 text-center px-6"
           initial={{ opacity: 0, y: 40 }}
@@ -129,7 +162,7 @@ export default function Players() {
           transition={{ duration: 1 }}
         >
           <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight">
-            AGGIE ESPORTS PLAYERS
+            PLAYERS
           </h1>
           <p className="mt-4 text-xl text-white">
             Meet our competitive rosters for every year
@@ -138,10 +171,10 @@ export default function Players() {
           <div className="mt-12 grid grid-cols-3 gap-8 max-w-lg mx-auto">
             <div className="text-center">
               <div className="text-3xl font-bold text-white">
-                {roster.length}
+                {loadingTotals ? "—" : totalPlayers}
               </div>
               <div className="text-sm text-white/70 uppercase tracking-wider">
-                Active Players
+                Total Players
               </div>
             </div>
             <div className="text-center">
@@ -154,7 +187,7 @@ export default function Players() {
             </div>
             <div className="text-center">
               <div className="text-3xl font-bold text-white">
-                {teamCount}
+                {loadingTotals ? "—" : totalTeams}
               </div>
               <div className="text-sm text-white/70 uppercase tracking-wider">
                 Teams
@@ -162,8 +195,9 @@ export default function Players() {
             </div>
           </div>
         </motion.div>
+
         <motion.div
-          className="absolute bottom-20"
+          className="absolute bottom-6"
           animate={{ y: [0, 15, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
@@ -230,7 +264,6 @@ export default function Players() {
                 ))}
               </select>
 
-              {/* chevron */}
               <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
                 <ChevronDown
                   className="
@@ -242,7 +275,6 @@ export default function Players() {
               </div>
             </div>
 
-            {/* subtle acccent bar */}
             <div
               className="
                 absolute -bottom-2 left-1/2 -translate-x-1/2
@@ -278,7 +310,6 @@ export default function Players() {
       {/* ----------------------------------------------------------- Players list */}
       <section className="py-20 bg-white dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-6">
-          {/* loading / errors / empty states collapse to one of three blocks */}
           {loadingRoster && (
             <motion.div
               className="text-center py-24"
@@ -286,8 +317,8 @@ export default function Players() {
               animate={{ opacity: 1 }}
             >
               <div className="relative">
-                <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#500000]/20 dark:border-[#b75b5b]/20 border-t-[#500000] dark:border-t-[#b75b5b] mx-auto"></div>
-                <div className="absolute inset-0 rounded-full bg-[#500000]/5 dark:bg-[#b75b5b]/10"></div>
+                <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#500000]/20 dark:border-[#b75b5b]/20 border-t-[#500000] dark:border-t-[#b75b5b] mx-auto" />
+                <div className="absolute inset-0 rounded-full bg-[#500000]/5 dark:bg-[#b75b5b]/10" />
               </div>
               <p className="mt-6 text-gray-600 dark:text-gray-300 font-medium">
                 Loading {selectedYear} roster...
@@ -332,8 +363,7 @@ export default function Players() {
                   No Players Found
                 </h3>
                 <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
-                  We don't have roster data for <strong>{selectedYear}</strong>{" "}
-                  yet.
+                  We don't have roster data for <strong>{selectedYear}</strong> yet.
                   <br />
                   Try selecting a different season or check back later.
                 </p>
@@ -341,14 +371,12 @@ export default function Players() {
             </motion.div>
           )}
 
-          {/* -------------------------------------- main roster grid when data ok */}
           {!loadingRoster && !error && roster.length > 0 && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6 }}
             >
-              {/* season header */}
               <div className="text-center mb-16">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -364,16 +392,14 @@ export default function Players() {
                       {roster.length} Players • {teamCount} Teams
                     </span>
                   </div>
-                  <div className="w-24 h-1 bg-[#500000] dark:bg-[#b75b5b] mx-auto mt-4 rounded-full"></div>
+                  <div className="w-24 h-1 bg-[#500000] dark:bg-[#b75b5b] mx-auto mt-4 rounded-full" />
                 </motion.div>
               </div>
 
-              {/* each team */}
               <div className="space-y-16">
                 {teamOrder.map((team) => {
                   const players = rosterByTeam[team];
                   if (!players?.length) return null;
-
                   return (
                     <motion.div
                       key={team}
@@ -391,8 +417,8 @@ export default function Players() {
                         >
                           <h3 className="text-2xl font-bold">{team}</h3>
                         </div>
-                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           {players.length} players
                         </div>
                       </div>
@@ -410,10 +436,7 @@ export default function Players() {
                             }}
                             viewport={{ once: true }}
                           >
-                            <PlayerCard
-                              name={p.display_name}
-                              iconId={p.iconId}
-                            />
+                            <PlayerCard name={p.display_name} iconId={p.iconId} />
                           </motion.div>
                         ))}
                       </div>
@@ -421,7 +444,7 @@ export default function Players() {
                   );
                 })}
 
-                {/* any other ad-hoc teams */}
+                {/* ad-hoc teams not in teamOrder */}
                 {Object.keys(rosterByTeam)
                   .filter((t) => !teamOrder.includes(t))
                   .map((t) => (
@@ -440,8 +463,8 @@ export default function Players() {
                         >
                           <h3 className="text-2xl font-bold">{t}</h3>
                         </div>
-                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700"></div>
-                        <div className="text-sm text-gray-500 dark:text-gray-400 font-medium">
+                        <div className="flex-1 h-px bg-gray-200 dark:bg-gray-700" />
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
                           {rosterByTeam[t].length} players
                         </div>
                       </div>
@@ -458,10 +481,7 @@ export default function Players() {
                             }}
                             viewport={{ once: true }}
                           >
-                            <PlayerCard
-                              name={p.display_name}
-                              iconId={p.iconId}
-                            />
+                            <PlayerCard name={p.display_name} iconId={p.iconId} />
                           </motion.div>
                         ))}
                       </div>

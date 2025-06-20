@@ -1,140 +1,144 @@
-// vite-project/backend/services/riotSync.js
+// backend/services/riotSync.js
+// ---------------------------------------------------------------------------
+// Pull current Riot-ID + solo-queue data for every account in riot_accounts
+// and store a snapshot in league_entries.  Runs in 20-account batches.
+// ---------------------------------------------------------------------------
 
-import { pool } from "../db/pool.js";
-import {
-  loadSummoners,
-  getAccountInfo,
-  getSummonerInfo,
-  getLeagueInfo,
-} from "../../src/lib/riotApi.js";
+import axios from 'axios';
+import { pool } from '../db/pool.js';
 
-// ─── Batch size and pause intervals ───────────────────────────────
-// We process 20 accounts, then pause for 5 minutes.
-// Within each batch, we insert a small delay between individual requests.
+/* ───── Riot clients ──────────────────────────────────────────────────── */
+// Region-group client (americas) – Account-V1
+const riotRG = axios.create({
+  baseURL: 'https://americas.api.riotgames.com',
+  headers: { 'X-Riot-Token': process.env.RIOT_KEY },
+});
+// Platform client (na1) – Summoner-V4 & League-V4
+const riotNA = axios.create({
+  baseURL: 'https://na1.api.riotgames.com',
+  headers: { 'X-Riot-Token': process.env.RIOT_KEY },
+});
+
+/* ───── Batch helpers ─────────────────────────────────────────────────── */
 const BATCH_SIZE       = 20;
-const BATCH_PAUSE_MS   = 5 * 60 * 1000;  // 5 minutes
-const REQUEST_DELAY_MS = 500;            // 0.5 seconds between each account
+const BATCH_PAUSE_MS   = 5 * 60 * 1000; // 5 minutes
+const REQUEST_DELAY_MS = 500;           // 0.5 s
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
+/* ───── UPSERT helper for riot_accounts ───────────────────────────────── */
+async function upsertAccount({
+  playerId,
+  gameName,
+  tagLine,
+  puuid,
+  profileIconId,     // may be null on first call
+}) {
+  const riotSlug = `${gameName.toLowerCase()}-${tagLine}`;
 
-/** ░░ Sync ONE Riot account ░░ */
-async function syncOne({ gameName, tagLine }) {
-  // 1 · Resolve PUUID
-  const acct = await getAccountInfo(gameName, tagLine);
-
-  // 2 · Upsert into riot_accounts (puuid, profile_icon_id, etc.)
-  const {
-    rows: [{ id: summonerId }],
-  } = await pool.query(
-    `
-    INSERT INTO riot_accounts (puuid, game_name, tag_line, riot_slug)
-    VALUES ($1, $2, $3, lower($2 || '-' || $3))
-    ON CONFLICT (puuid)
-      DO UPDATE SET
-        game_name = EXCLUDED.game_name,
-        tag_line  = EXCLUDED.tag_line
-    RETURNING id
-    `,
-    [acct.puuid, acct.gameName, acct.tagLine]
-  );
-
-  // 3 · Fetch Summoner Info (to get profileIconId & encrypted summoner ID)
-  const summ = await getSummonerInfo(acct.puuid);
   await pool.query(
     `
-    UPDATE riot_accounts
-       SET profile_icon_id = $1,
-           last_checked_at = NOW()
-     WHERE id = $2
-    `,
-    [summ.profileIconId, summonerId]
+    INSERT INTO riot_accounts
+      (player_id, game_name, tag_line, puuid, riot_slug,
+       profile_icon_id, last_checked_at)
+    VALUES
+      ($1, $2, $3, $4, $5, $6, NOW())
+    ON CONFLICT (puuid) DO UPDATE
+    SET game_name       = EXCLUDED.game_name,
+        tag_line        = EXCLUDED.tag_line,
+        riot_slug       = EXCLUDED.riot_slug,
+        profile_icon_id = COALESCE(EXCLUDED.profile_icon_id,
+                                   riot_accounts.profile_icon_id),
+        last_checked_at = NOW();
+  `,
+    [playerId, gameName, tagLine, puuid, riotSlug, profileIconId]
+  );
+}
+
+/* ───── Sync ONE account ─────────────────────────────────────────────── */
+async function syncOne({ id: accountId, player_id: playerId, puuid }) {
+  /* 1 ▸ Riot-ID (Account-V1, americas) */
+  const { data: acct } = await riotRG.get(
+    `/riot/account/v1/accounts/by-puuid/${puuid}`
+  );
+  await upsertAccount({
+    playerId,
+    gameName: acct.gameName,
+    tagLine:  acct.tagLine,
+    puuid,
+    profileIconId: null,   // will store icon after Summoner call
+  });
+
+  /* 2 ▸ Summoner-V4 (na1) – gives icon + encrypted summonerId */
+  const { data: summ } = await riotNA.get(
+    `/lol/summoner/v4/summoners/by-puuid/${puuid}`
   );
 
-  // 4 · Fetch Solo-queue data and INSERT into league_entries
-  const entries   = await getLeagueInfo(summ.id);
-  const soloEntry = entries.find(e => e.queueType === "RANKED_SOLO_5x5");
-  if (!soloEntry) {
-    // Unranked: skip adding a row in league_entries
-    return;
-  }
+  // update icon now that we have it
+  await pool.query(
+    'UPDATE riot_accounts SET profile_icon_id=$1 WHERE id=$2',
+    [summ.profileIconId, accountId]
+  );
 
-  // ─── Adjusted INSERT to match your league_entries schema ─────────────
-  // Table columns: id, summoner_id, fetched_at, lp, wins, losses, tier, division, profile_icon_id, recorded_at
+  /* 3 ▸ League-V4 solo entry (na1) */
+  const { data: entries } = await riotNA.get(
+    `/lol/league/v4/entries/by-summoner/${summ.id}`
+  );
+  const solo = entries.find((e) => e.queueType === 'RANKED_SOLO_5x5');
+  if (!solo) return; // unranked
+
   await pool.query(
     `
     INSERT INTO league_entries
-      (summoner_id,
-       fetched_at,
-       lp,
-       wins,
-       losses,
-       tier,
-       division,
-       profile_icon_id,
-       recorded_at)
+      (summoner_id, fetched_at, lp, wins, losses,
+       tier, division, profile_icon_id, recorded_at)
     VALUES
-      ($1, NOW(), $2, $3, $4, $5, $6, $7, NOW())
-    `,
+      ($1, NOW(), $2, $3, $4, $5, $6, $7, NOW());
+  `,
     [
-      summonerId,                         // $1 → summoner_id
-      soloEntry.leaguePoints,             // $2 → lp
-      soloEntry.wins,                     // $3 → wins
-      soloEntry.losses,                   // $4 → losses
-      soloEntry.tier.toLowerCase(),       // $5 → tier (e.g., "gold")
-      soloEntry.rank,                     // $6 → division (e.g., "II")
-      summ.profileIconId                  // $7 → profile_icon_id
+      accountId,
+      solo.leaguePoints,
+      solo.wins,
+      solo.losses,
+      solo.tier.toLowerCase(),
+      solo.rank,
+      summ.profileIconId,
     ]
   );
 }
 
-/** ░░ Sync all summoners, in batches of 20 with delays ░░ */
+/* ───── Public: sync every account in batches ─────────────────────────── */
 export async function syncAllAccounts() {
-  const list = await loadSummoners();
+  const { rows: list } = await pool.query(
+    'SELECT id, player_id, puuid FROM riot_accounts'
+  );
 
   for (let i = 0; i < list.length; i += BATCH_SIZE) {
-    const batch       = list.slice(i, i + BATCH_SIZE);
-    const batchNumber = Math.floor(i / BATCH_SIZE) + 1;
-    const startIdx    = i + 1;
-    const endIdx      = Math.min(i + BATCH_SIZE, list.length);
+    const batch = list.slice(i, i + BATCH_SIZE);
+    const n     = Math.floor(i / BATCH_SIZE) + 1;
 
-    console.log(
-      `⏳  Starting batch ${batchNumber} (accounts ${startIdx} to ${endIdx})`
-    );
+    console.log(`⏳  Batch ${n} — accounts ${i + 1}-${i + batch.length}`);
 
     for (let j = 0; j < batch.length; j++) {
-      const summoner = batch[j];
       try {
-        await syncOne(summoner);
-        console.log(`   ✔ Synced ${summoner.gameName}#${summoner.tagLine}`);
+        await syncOne(batch[j]);
+        console.log(`   ✔ ${batch[j].puuid.slice(0,8)}… synced`);
       } catch (err) {
         console.error(
-          `   ⚠️  sync failed for ${summoner.gameName}#${summoner.tagLine}:`,
-          err.message
+          `   ⚠️  sync failed for ${batch[j].puuid.slice(0,8)}…:`,
+          err.response?.status || err.message
         );
       }
-
-      // Delay before next account to avoid bursting
-      if (j < batch.length - 1) {
-        await sleep(REQUEST_DELAY_MS);
-      }
+      if (j < batch.length - 1) await sleep(REQUEST_DELAY_MS);
     }
 
-    console.log(
-      `✅  Finished batch ${batchNumber} (accounts ${startIdx} to ${endIdx})`
-    );
-
-    // Pause 5 minutes before next batch (unless this was the last batch)
+    console.log(`✅  Batch ${n} done`);
     if (i + BATCH_SIZE < list.length) {
-      console.log(
-        `🛑  Pausing for ${BATCH_PAUSE_MS / 60000} minutes before next batch…`
-      );
+      console.log(`🛑  Sleeping ${BATCH_PAUSE_MS / 60000} min…`);
       await sleep(BATCH_PAUSE_MS);
     }
   }
 
   console.log(
-    `🎉  Finished syncing all ${list.length} accounts at ${new Date().toISOString()}`
+    `🎉  Finished ${list.length} accounts at ${new Date().toISOString()}`
   );
 }

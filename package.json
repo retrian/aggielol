@@ -14,10 +14,11 @@
   "dependencies": {
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/postcss": "^4.1.7",
-    "axios": "^1.9.0",
+    "axios": "^1.10.0",
     "bcryptjs": "^3.0.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "firebase": "^11.8.0",
     "framer-motion": "^12.12.1",
@@ -25,13 +26,13 @@
     "lucide-react": "^0.511.0",
     "node-cron": "^4.1.0",
     "node-fetch": "^3.3.2",
+    "pg": "^8.16.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^7.6.0",
+    "recharts": "^2.15.3",
     "tailwind-merge": "^3.3.0",
-    "tailwindcss-animate": "^1.0.7",
-    "pg": "^8.16.0",
-    "dotenv": "^16.5.0"
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@eslint/js": "^9.25.0",

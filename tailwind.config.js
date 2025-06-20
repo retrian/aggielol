@@ -1,54 +1,31 @@
-/**  tailwind.config.js  (CommonJS so it works in every Node setup) */
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: ['class'],
+  darkMode: 'class',                     // light = default, .dark = dark
   content: [
     './index.html',
     './src/**/*.{js,jsx,ts,tsx}',
   ],
-
-  
   theme: {
     extend: {
-      /* ------------  custom design tokens  ------------ */
+      /* HSL helpers that read from CSS variables set in :root /.dark */
       colors: {
-        /*   bg-background, text-foreground, etc.   */
-        background:  'hsl(var(--background) / <alpha-value>)',
-        foreground:  'hsl(var(--foreground) / <alpha-value>)',
-
-        /*   <<< THIS is the one Vite keeps yelling about  */
+        background: 'hsl(var(--background) / <alpha-value>)',
+        foreground: 'hsl(var(--foreground) / <alpha-value>)',
         border:      'hsl(var(--border) / <alpha-value>)',
-
         input:       'hsl(var(--input) / <alpha-value>)',
         ring:        'hsl(var(--ring) / <alpha-value>)',
+
+        /* TAMU maroon shade for accents */
+        maroon: {
+          700: '#500000',
+        },
       },
       borderRadius: {
         lg: 'var(--radius)',
       },
     },
   },
-
   plugins: [
-    require('tailwindcss-animate'),  // safe to delete if you don’t use it
+    require('tailwindcss-animate'),
   ],
-};
-
-// tailwind.config.js
-module.exports = {
-  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
-  darkMode: "class",          // ⬅️  change from false → "class"
-  theme: { extend: {} },
-  plugins: [],
-};
-
-// tailwind.config.js
-export default {
-  theme: {
-    extend: {
-      colors: {
-        maroon: {
-          700: "#500000",
-        },
-      },
-    },
-  },
 };

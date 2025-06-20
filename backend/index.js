@@ -4,17 +4,23 @@ import 'dotenv/config';
 import express from 'express';
 import cron from 'node-cron';
 import { pool } from './db/pool.js';
-
+import { syncAllAccounts } from './services/riotSync.js'; // adjust path if needed
 import adminRouter from './routes/admin.js';
 import playersRouter from './routes/players.js';
 import teamsRouter from './routes/teams.js';
 import leaderboardRouter from './routes/leaderboard.js';
 import schoolYearsRouter from './routes/schoolYears.js';
 
-import { syncAllAccounts } from './services/riotSync.js'; // adjust path if needed
-
 const app = express();
 app.use(express.json());
+
+const key = process.env.RIOT_KEY ?? '';
+if (!key) {
+  console.error('⛔  RIOT_KEY is not set in the environment (.env)');
+  process.exit(1);
+}
+// Print only the first 8 chars so you don’t leak the whole key
+console.log('🔑 RIOT_KEY loaded:', key.slice(0, 8) + '…');
 
 // Log and verify DATABASE_URL
 console.log('▶️ DATABASE_URL:', process.env.DATABASE_URL);

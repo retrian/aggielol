@@ -1,4 +1,3 @@
-// src/lib/theme.jsx
 import { createContext, useContext, useEffect, useState } from "react";
 
 /* ---------- Context ---------- */
@@ -17,11 +16,17 @@ export function ThemeProvider({ children }) {
     );
   });
 
+  // Avoid first-paint flash
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
   // Keep <html> class & localStorage in sync
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
     localStorage.setItem("theme", theme);
   }, [theme]);
+
+  if (!mounted) return null; // wait one tick before rendering
 
   return (
     <ThemeCtx.Provider value={{ theme, setTheme }}>
