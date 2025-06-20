@@ -13,7 +13,16 @@ import About       from "./pages/About";
 
 import TeamDetail      from "./pages/TeamDetail";
 import PlayerProfile   from "./pages/PlayerProfile";
-console.log('API BASE →', import.meta.env.VITE_API_BASE_URL);
+
+// quick sanity check inside any component
+useEffect(() => {
+  fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leaderboard/entries`)
+    .then(r => r.json())
+    .then(d => console.log('API HEALTH →', d))
+    .catch(err => console.error('API FAIL →', err));
+}, []);
+
+
 export default function App() {
   return (
     <>
