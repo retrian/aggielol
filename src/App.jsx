@@ -13,7 +13,7 @@ import About       from "./pages/About";
 
 import TeamDetail      from "./pages/TeamDetail";
 import PlayerProfile   from "./pages/PlayerProfile";
-import ApiTest from './pages/ApiTest.jsx';
+import ApiTest from "./pages/ApiTest";
 
 export default function App() {
   return (
