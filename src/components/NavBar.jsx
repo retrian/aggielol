@@ -113,6 +113,12 @@ export default function NavBar() {
               ${isScrolled ? 'text-sm px-3 py-1.5' : 'text-base px-4 py-2'}
             `}>About</span>
           </NavLink>
+          <NavLink to="/ApiTest" className={linkClass}>
+            <span className={`
+              relative z-10 transition-all duration-300
+              ${isScrolled ? 'text-sm px-3 py-1.5' : 'text-base px-4 py-2'}
+            `}>ApiTest</span>
+          </NavLink>
         </div>
 
         {/* Right: enhanced theme toggle and profile area */}
