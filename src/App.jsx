@@ -13,24 +13,14 @@ import About       from "./pages/About";
 
 import TeamDetail      from "./pages/TeamDetail";
 import PlayerProfile   from "./pages/PlayerProfile";
-
-import { useEffect } from 'react';
-import './App.css';
-
-// quick sanity check inside any component
-useEffect(() => {
-  fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leaderboard/entries`)
-    .then(r => r.json())
-    .then(d => console.log('API HEALTH →', d))
-    .catch(err => console.error('API FAIL →', err));
-}, []);
-
+import ApiTest from './pages/ApiTest.jsx';
 
 export default function App() {
   return (
     <>
       <NavBar />
       <Routes>
+        <Route path="/apitest" element={<ApiTest />} />
         <Route path="/"              element={<Home />} />
         <Route path="/teams"         element={<Teams />} />
         <Route path="/teams/:slug"   element={<TeamDetail />} /> 
