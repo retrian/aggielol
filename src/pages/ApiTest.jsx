@@ -12,7 +12,7 @@ export default function ApiTest() {
   const ping = async () => {
     setStatus('Pinging…');
     try {
-      const res = await fetch(`${API_BASE}/api/health`);
+      const res = await fetch(`${API_BASE}/api/leaderboard/entries`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setPayload(data);
