@@ -14,6 +14,9 @@ import About       from "./pages/About";
 import TeamDetail      from "./pages/TeamDetail";
 import PlayerProfile   from "./pages/PlayerProfile";
 
+import { useEffect } from 'react';
+import './App.css';
+
 // quick sanity check inside any component
 useEffect(() => {
   fetch(`${import.meta.env.VITE_API_BASE_URL}/api/leaderboard/entries`)
