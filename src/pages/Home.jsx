@@ -63,7 +63,7 @@ export default function Home() {
           </h1>
           
           <p className="mt-4 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
-            The ultimate university League of Legends page
+            The ultimate university League of Legends page.
           </p>
 
           <div className="mt-8 flex justify-center gap-4 sm:gap-6 flex-wrap">

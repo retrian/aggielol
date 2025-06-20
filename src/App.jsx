@@ -13,7 +13,7 @@ import About       from "./pages/About";
 
 import TeamDetail      from "./pages/TeamDetail";
 import PlayerProfile   from "./pages/PlayerProfile";
-
+console.log('API BASE →', import.meta.env.VITE_API_BASE_URL);
 export default function App() {
   return (
     <>

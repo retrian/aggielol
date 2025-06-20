@@ -30,7 +30,7 @@ export default function NavBar() {
 
     window.addEventListener('scroll', handleScroll);
     
-    // Cleanup function to remove event listener
+    // Cleanup function to remove event list ener
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 

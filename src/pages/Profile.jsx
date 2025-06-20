@@ -51,7 +51,7 @@ export default function Profile() {
         transition={{ delay: 0.5 }}
       >
         I'm working on this feature right now. Check back soon to view and
-        edit player and user profiles!
+        edit player and user profiles!!
       </motion.p>
 
       {/* Back button */}
