@@ -4,9 +4,6 @@ import { motion } from "framer-motion";
 import { ChevronDown, Users, Calendar } from "lucide-react";
 import PlayerCard from "@/components/PlayerCard";
 
-/* pixel height of the navbar (adjust if you change Navbar padding) */
-const NAVBAR_H = 72;
-
 /* ---------------- helper to flatten one API row -------------------- */
 function flattenPlayerRow(row) {
   if (row.player && row.accounts) {
@@ -146,11 +143,12 @@ export default function Players() {
       <section
         className="
           relative flex flex-col items-center justify-center
-          bg-fixed bg-center bg-cover
+          bg-center bg-cover bg-no-repeat
         "
         style={{
           backgroundImage: "url('/assets/hero-bg.webp')",
-          minHeight: `calc(100dvh - ${NAVBAR_H}px)`,
+          backgroundAttachment: "fixed",
+          height: "125vh",
         }}
       >
         <div className="absolute inset-0 bg-[#500000]/90" />
@@ -161,10 +159,10 @@ export default function Players() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white tracking-tight leading-tight">
             PLAYERS
           </h1>
-          <p className="mt-4 text-xl text-white">
+          <p className="mt-4 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
             Meet our competitive rosters for every year
           </p>
 
@@ -197,11 +195,11 @@ export default function Players() {
         </motion.div>
 
         <motion.div
-          className="absolute bottom-6"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
           animate={{ y: [0, 15, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
-          <ChevronDown className="w-10 h-10 text-white" />
+          <ChevronDown className="w-8 h-8 sm:w-10 sm:h-10 text-white/80" />
         </motion.div>
       </section>
 

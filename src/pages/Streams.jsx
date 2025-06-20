@@ -1,57 +1,73 @@
 // src/pages/StreamsPage.jsx
-import React from 'react';
-import { motion } from 'framer-motion';
-import { Play } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { motion } from "framer-motion";
+import { Play, ChevronDown } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export default function StreamsPage() {
+  // scroll to top on mount
+  useEffect(() => window.scrollTo(0, 0), []);
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-gray-900 via-gray-800 to-red-900 p-6">
-      <motion.div
-        className="relative mb-8"
-        initial={{ scale: 0 }}
-        animate={{ scale: 1 }}
-        transition={{ type: 'spring', stiffness: 120, delay: 0.2 }}
+    <main className="min-h-screen">
+      {/* ----------------------------------------------------------- HERO */}
+      <section
+        className="
+          relative flex flex-col items-center justify-center
+          bg-center bg-cover bg-no-repeat
+        "
+        style={{
+          backgroundImage: "url('/assets/hero-bg.webp')",
+          backgroundAttachment: "fixed",
+          height: "125vh",
+        }}
       >
-        <Play size={96} className="text-red-400" />
+        <div className="absolute inset-0 bg-[#500000]/90" />
+
         <motion.div
-          className="absolute inset-0 bg-red-400/20 rounded-full blur-xl"
-          animate={{ scale: [1, 1.3, 1], opacity: [0.3, 0.6, 0.3] }}
-          transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        />
-      </motion.div>
+          className="relative z-10 text-center px-6"
+          initial={{ opacity: 0, y: 40 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1 }}
+        >
+          <Play size={96} className="mx-auto text-white mb-6" />
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white tracking-tight leading-tight">
+            STREAMS
+          </h1>
+          <p className="mt-4 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
+            Watch our matches &amp; VODs live
+          </p>
+        </motion.div>
 
-      <motion.h1
-        className="text-4xl md:text-5xl font-bold text-white mb-4 text-center"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        Streams Page
-      </motion.h1>
+        <motion.div
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 15, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          <ChevronDown className="w-8 h-8 sm:w-10 sm:h-10 text-white/80" />
+        </motion.div>
+      </section>
 
-      <motion.p
-        className="text-white/70 text-lg mb-8 text-center max-w-xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        This feature is coming soon! I'm getting everything ready so you can catch 
-        all our live League of Legends action right here. Stay tuned!
-      </motion.p>
+      {/* ----------------------------------------------------------- PLACEHOLDER / CTA */}
+      <section className="py-28 bg-white dark:bg-gray-900 flex flex-col items-center text-center px-6">
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="max-w-xl"
+        >
+          <p className="text-gray-700 dark:text-gray-300 text-lg mb-8 leading-relaxed">
+            This feature is coming soon! Im setting up everything so you can watch everything here!
+          </p>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.6 }}
-      >
-        <Button asChild size="lg" className="bg-red-600 hover:bg-red-700 text-white">
-          <Link to="/" className="flex items-center gap-2">
-            ← Back to Home
-          </Link>
-        </Button>
-      </motion.div>
-    </div>
+          <Button asChild size="lg" className="bg-[#500000] hover:bg-[#600000] text-white">
+            <Link to="/" className="flex items-center gap-2">
+              ← Back to Home
+            </Link>
+          </Button>
+        </motion.div>
+      </section>
+    </main>
   );
 }

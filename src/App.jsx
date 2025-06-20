@@ -21,7 +21,7 @@ export default function App() {
       <Routes>
         <Route path="/"              element={<Home />} />
         <Route path="/teams"         element={<Teams />} />
-        <Route path="/teams/:slug"   element={<TeamDetail />} />  {/* ← only this */}
+        <Route path="/teams/:slug"   element={<TeamDetail />} /> 
         <Route path="/players"       element={<Players />} />
         <Route path="/players/:id"   element={<PlayerProfile />} />
         <Route path="/leaderboard"   element={<Leaderboard />} />

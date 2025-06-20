@@ -4,14 +4,11 @@ import { motion } from "framer-motion";
 import { ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
-/* navbar height in pixels (update if navbar changes) */
-const NAVBAR_H = 72;
-
 const teams = [
-  { name: "Maroon", color: "#500000", href: "/teams/1", desc: "" },
+  { name: "Maroon",     color: "#500000", href: "/teams/1", desc: "" },
   { name: "Team White", color: "#FFFFFF", href: "/teams/2", desc: "Diamond to Master level roster." },
   { name: "Team Black", color: "#000000", href: "/teams/3", desc: "Emerald to Diamond level roster." },
-  { name: "Team Gray", color: "#A0A0A0", href: "/teams/4", desc: "Emerald level roster." },
+  { name: "Team Gray",  color: "#A0A0A0", href: "/teams/4", desc: "Emerald level roster." },
 ];
 
 export default function Teams() {
@@ -23,35 +20,39 @@ export default function Teams() {
       <section
         className="
           relative flex flex-col items-center justify-center
-          bg-fixed bg-center bg-cover
+          bg-center bg-cover bg-no-repeat
         "
         style={{
           backgroundImage: "url('/assets/hero-bg.webp')",
-          minHeight: `calc(100dvh - ${NAVBAR_H}px)`,
+          backgroundAttachment: "fixed",
+          height: "125vh",
         }}
       >
+        {/* maroon overlay */}
         <div className="absolute inset-0 bg-[#500000]/90" />
 
+        {/* headline / sub-copy */}
         <motion.div
           className="relative z-10 text-center px-6"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight">
-            OUR TEAMS
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white tracking-tight leading-tight">
+            OUR&nbsp;TEAMS
           </h1>
-          <p className="mt-4 text-xl text-white">
-            Competitive rosters representing Texas A&M at every skill level
+          <p className="mt-4 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
+            Competitive rosters representing Texas&nbsp;A&amp;M at every skill level
           </p>
         </motion.div>
 
+        {/* bouncing chevron */}
         <motion.div
-          className="absolute bottom-6"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
           animate={{ y: [0, 15, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
-          <ChevronDown className="w-10 h-10 text-white" />
+          <ChevronDown className="w-8 h-8 sm:w-10 sm:h-10 text-white/80" />
         </motion.div>
       </section>
 
@@ -66,14 +67,14 @@ export default function Teams() {
             className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-12 border border-gray-100 dark:border-gray-700"
           >
             <div className="flex flex-col lg:flex-row items-center gap-16">
-              {/* left */}
+              {/* left copy */}
               <div className="flex-1 text-center lg:text-left">
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-white mb-6">
-                  Team Maroon
+                  Team&nbsp;Maroon
                 </h2>
                 <p className="text-xl text-gray-600 dark:text-gray-300 mb-10 leading-relaxed max-w-lg">
                   Our premier varsity roster, competing at the highest level.
-                  Masters+ level team representing Texas A&M.
+                  Masters+ level team representing Texas&nbsp;A&amp;M.
                 </p>
                 <Link
                   to="/teams/1"
@@ -108,8 +109,7 @@ export default function Teams() {
               </div>
             </div>
             <p className="text-lg text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Structured progression teams designed to develop players at every skill
-              level
+              Structured progression teams designed to develop players at every skill level
             </p>
           </div>
 

@@ -1,16 +1,17 @@
+// src/pages/About.jsx
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Trophy, Users, Target, Calendar } from "lucide-react";
+import { Trophy, Users, Target, Calendar, ChevronDown } from "lucide-react";
 import { Link } from "react-router-dom";
 
 const achievements = [
   { year: "2013", title: "Collegiate Starleague", placement: "2nd Place" },
-  { year: "2015", title: "NACC Championship", placement: "3rd-4th" },
+  { year: "2015", title: "NACC Championship",     placement: "3rd-4th" },
   { year: "2016", title: "CLOL South Conference Playoffs", placement: "2nd Place" },
   { year: "2017", title: "CLOL South Conference Playoffs", placement: "1st Place" },
-  { year: "2017", title: "CLOL Championship", placement: "5th-8th" },
+  { year: "2017", title: "CLOL Championship",     placement: "5th-8th" },
   { year: "2018", title: "CLOL South Conference Playoffs", placement: "3rd-4th" },
   { year: "2019", title: "CLOL South Conference Playoffs", placement: "5th-8th" },
   { year: "2020", title: "CLOL South Conference Playoffs", placement: "Top 8*" },
@@ -62,56 +63,89 @@ export default function About() {
 
   return (
     <main className="space-y-24">
-      {/* Hero Section */}
-      <section className="relative h-screen flex items-center justify-center bg-[url('/assets/hero-bg.webp')] bg-cover bg-center">
+      {/* ----------------------------------------------------------- HERO */}
+      <section
+        className="
+          relative flex flex-col items-center justify-center
+          bg-center bg-cover bg-no-repeat
+        "
+        style={{
+          backgroundImage: "url('/assets/hero-bg.webp')",
+          backgroundAttachment: "fixed",
+          height: "125vh",
+        }}
+      >
         <div className="absolute inset-0 bg-[#500000]/90" />
+
         <motion.div
-          className="relative z-10 text-center px-4 max-w-2xl"
-          initial={{ opacity: 0, y: 30 }}
+          className="relative z-10 text-center px-6 max-w-2xl"
+          initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <h1 className="text-6xl md:text-7xl font-black text-white leading-tight">
-            About Texas A&amp;M
-            <br /> League of Legends
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white leading-tight tracking-tight">
+            ABOUT US <br className="hidden sm:block" />
+            
           </h1>
-          <p className="mt-4 text-xl text-white/80">
-            A decade of collegiate esports excellence & community building
+          <p className="mt-4 text-lg sm:text-xl text-white/80">
+            A decade of collegiate esports excellence &amp; community building
           </p>
+        </motion.div>
+
+        <motion.div
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
+          animate={{ y: [0, 15, 0] }}
+          transition={{ repeat: Infinity, duration: 2 }}
+        >
+          <ChevronDown className="w-8 h-8 sm:w-10 sm:h-10 text-white/80" />
         </motion.div>
       </section>
 
-      {/* Mission Section */}
+      {/* ----------------------------------------------------------- OUR LEGACY */}
       <section className="py-16 bg-white">
         <div className="mx-auto max-w-4xl px-6 text-center">
           <h2 className="text-4xl font-bold text-[#500000] mb-6">Our Legacy</h2>
           <p className="text-gray-700 text-lg leading-relaxed">
-            Founded in 2012, Texas A&amp;M Esports unites Aggies passionate about League of Legends—from championship contenders to casual Clash squads.
+            Founded in 2012, Texas&nbsp;A&amp;M Esports unites Aggies passionate about League of Legends.
+            Every year, new players join our club and accomplish great things—in and out of the Rift.
+            From academic connections to teamwork and personal growth, we push Aggies to be better
+            teammates, competitors, and leaders.
           </p>
-          <span className="mt-8 inline-block bg-[#500000] text-white px-8 py-3 rounded-full font-semibold">
-            Competition · Community · Growth
-          </span>
         </div>
       </section>
 
-      {/* Achievements Section */}
-      <section className="py-16 bg-gray-50">
+      {/* ----------------------------------------------------------- ACHIEVEMENTS */}
+      <section className="py-16 bg-white">
         <div className="mx-auto max-w-6xl px-6">
-          <h2 className="text-4xl font-bold text-[#500000] mb-8 text-center">Championship History</h2>
+          <div className="relative mb-12 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300" />
+            </div>
+            <h2 className="relative inline-block bg-white px-8 text-3xl md:text-4xl font-bold text-[#500000]">
+              Championship History
+            </h2>
+          </div>
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {achievements.map((a, i) => (
+            {achievements.map((a) => (
               <Card
-                key={i}
+                key={a.year + a.title}
                 className="transform hover:scale-105 transition-all duration-300"
               >
                 <CardHeader className="text-center">
-                  <CardTitle className="text-3xl font-bold text-[#500000]">{a.year}</CardTitle>
+                  <CardTitle className="text-3xl font-bold text-[#500000]">
+                    {a.year}
+                  </CardTitle>
                   <p className="mt-2 text-gray-800 font-medium">{a.title}</p>
                 </CardHeader>
                 <CardContent className="text-center">
-                  <span className="text-xl font-semibold text-[#500000]">{a.placement}</span>
+                  <span className="text-xl font-semibold text-[#500000]">
+                    {a.placement}
+                  </span>
                   {a.placement === "Top 8*" && (
-                    <p className="text-xs text-gray-500 mt-1">*Cancelled due to COVID</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      *Cancelled&nbsp;due&nbsp;to&nbsp;COVID
+                    </p>
                   )}
                 </CardContent>
               </Card>
@@ -120,43 +154,16 @@ export default function About() {
         </div>
       </section>
 
-      {/* Milestones Section */}
-      <section className="py-16 bg-white">
-        <div className="mx-auto max-w-5xl px-6">
-          <h2 className="text-4xl font-bold text-[#500000] mb-12 text-center">Key Milestones</h2>
-          <div className="flex flex-col lg:flex-row gap-8">
-            {milestones.map((m, i) => (
-              <motion.div
-                key={i}
-                className="flex-1 bg-gray-50 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-              >
-                <m.icon className="w-10 h-10 text-[#500000] mb-4" />
-                <h3 className="text-2xl font-semibold mb-2">{m.title}</h3>
-                <p className="text-gray-700 leading-relaxed">{m.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Stats Section */}
-      <section className="py-16 bg-gradient-to-r from-[#500000] to-[#7f0000] text-white">
-        <div className="mx-auto max-w-6xl grid grid-cols-2 md:grid-cols-4 gap-8 px-6 text-center">
+      {/* ----------------------------------------------------------- STATS */}
+      <section className="py-16 bg-gradient-to-r from-[#500000] to-[#500000] text-white">
+        <div className="mx-auto max-w-6xl grid grid-cols-2 md:grid-cols-3 gap-8 px-6 text-center">
           <div>
             <span className="text-5xl font-bold">2012</span>
             <p className="mt-2">Founded</p>
           </div>
           <div>
-            <span className="text-5xl font-bold">4</span>
-            <p className="mt-2">Active Teams</p>
-          </div>
-          <div>
-            <span className="text-5xl font-bold">30K+</span>
-            <p className="mt-2">Solo-queue Games</p>
+            <span className="text-5xl font-bold">150K+</span>
+            <p className="mt-2">Total&nbsp;Prize&nbsp;Earned</p>
           </div>
           <div>
             <span className="text-5xl font-bold">100+</span>
@@ -165,13 +172,13 @@ export default function About() {
         </div>
       </section>
 
-      {/* Values & Call to Action Section */}
+      {/* ----------------------------------------------------------- VALUES + CTA */}
       <section className="py-16 bg-gray-100">
         <div className="mx-auto max-w-5xl px-6 space-y-12">
           <div className="grid md:grid-cols-3 gap-8">
             {values.map((v, i) => (
               <motion.div
-                key={i}
+                key={v.title}
                 className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-xl transition-shadow"
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -183,15 +190,32 @@ export default function About() {
               </motion.div>
             ))}
           </div>
+
           <div className="text-center">
-            <h2 className="text-3xl font-bold text-[#500000] mb-4">Ready to Join the Legacy?</h2>
+            <h2 className="text-3xl font-bold text-[#500000] mb-4">
+              Ready to Join the Legacy?
+            </h2>
             <div className="flex flex-col sm:flex-row justify-center gap-6">
-              <Button className="bg-[#500000] hover:bg-[#400000] text-white" size="lg">
-                <a href="https://discord.gg/aggielol" target="_blank" rel="noopener noreferrer">
+              <Button
+                className="bg-[#500000] hover:bg-[#400000] text-white"
+                size="lg"
+                asChild
+              >
+                <a
+                  href="https://discord.gg/aggielol"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   Join Discord
                 </a>
               </Button>
-              <Button variant="outline" size="lg" className="border-[#500000] text-[#500000]">
+
+              <Button
+                variant="outline"
+                size="lg"
+                className="border-[#500000] text-[#500000]"
+                asChild
+              >
                 <Link to="/teams">View Teams</Link>
               </Button>
             </div>

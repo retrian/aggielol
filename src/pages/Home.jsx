@@ -42,34 +42,36 @@ export default function Home() {
       <section
         className="
           relative flex flex-col items-center justify-center
-          bg-fixed bg-center bg-cover
+          bg-center bg-cover bg-no-repeat
         "
         style={{
           backgroundImage: "url('/assets/hero-bg.webp')",
-          minHeight: `calc(100dvh - ${NAVBAR_H}px)`,
+          backgroundAttachment: 'fixed',
+          height: '125vh',
         }}
       >
         <div className="absolute inset-0 bg-[#500000]/90" />
 
         <motion.div
-          className="relative z-10 text-center px-6"
+          className="relative z-10 text-center px-6 max-w-9xl mx-auto"
           initial={{ opacity: 0, y: 40 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1 }}
         >
-          <h1 className="text-6xl md:text-8xl font-black text-white tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-8xl font-black text-white tracking-tight leading-tight">
             TEXAS A&amp;M LEAGUE OF LEGENDS
           </h1>
-          <p className="mt-4 text-xl text-white">
+          
+          <p className="mt-4 text-lg sm:text-xl text-white/90 max-w-2xl mx-auto">
             The ultimate university League of Legends page
           </p>
 
-          <div className="mt-8 flex justify-center gap-6 flex-wrap">
-            <Button className="bg-black text-white font-bold hover:bg-[#400000]" size="lg">
-              <Link to="/teams">Get Started</Link>
+          <div className="mt-8 flex justify-center gap-4 sm:gap-6 flex-wrap">
+            <Button className="bg-black text-white font-bold hover:bg-[#400000] transition-colors" size="lg">
+              <Link to="/teams" className="block w-full h-full">Get Started</Link>
             </Button>
-            <Button className="bg-black text-white font-bold hover:bg-[#400000]" size="lg">
-              <a href="https://discord.gg/aggielol" target="_blank" rel="noopener noreferrer">
+            <Button className="bg-black text-white font-bold hover:bg-[#400000] transition-colors" size="lg">
+              <a href="https://discord.gg/aggielol" target="_blank" rel="noopener noreferrer" className="block w-full h-full">
                 Join Discord
               </a>
             </Button>
@@ -77,11 +79,11 @@ export default function Home() {
         </motion.div>
 
         <motion.div
-          className="absolute bottom-6"
+          className="absolute bottom-8 left-1/2 transform -translate-x-1/2"
           animate={{ y: [0, 15, 0] }}
           transition={{ repeat: Infinity, duration: 2 }}
         >
-          <ChevronDown className="w-10 h-10 text-white" />
+          <ChevronDown className="w-8 h-8 sm:w-10 sm:h-10 text-white/80" />
         </motion.div>
       </section>
 
@@ -101,7 +103,7 @@ export default function Home() {
             {features.map((f) => (
               <motion.div
                 key={f.title}
-                className="bg-gray-50 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-0"
+                className="bg-gray-50 rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow duration-300"
                 whileHover={{ scale: 1.03 }}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -113,7 +115,7 @@ export default function Home() {
                 </h3>
                 <p className="text-gray-600 mb-4">{f.desc}</p>
                 {f.href && (
-                  <Link to={f.href} className="inline-block text-[#500000] font-medium">
+                  <Link to={f.href} className="inline-block text-[#500000] font-medium hover:text-[#400000] transition-colors">
                     Learn More →
                   </Link>
                 )}
@@ -125,11 +127,11 @@ export default function Home() {
 
       {/* ----------------------------------------------------------- STATS */}
       <section className="py-20 bg-gradient-to-r from-[#500000] to-[#7f0000]">
-        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center text-white">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 sm:grid-cols-3 gap-8 text-center text-white px-6">
           {stats.map((s) => (
             <div key={s.label}>
-              <span className="text-5xl font-bold block">{s.value}</span>
-              <p className="mt-2 text-lg">{s.label}</p>
+              <span className="text-4xl sm:text-5xl font-bold block">{s.value}</span>
+              <p className="mt-2 text-base sm:text-lg">{s.label}</p>
             </div>
           ))}
         </div>
@@ -160,8 +162,8 @@ export default function Home() {
               engagement between players, the org, and our community. Track teams,
               schedule events, and predict outcomes—all in one place.
             </p>
-            <Button className="bg-[#500000] text-white font-semibold hover:bg-[#400000]" size="lg">
-              <Link to="/about">Learn More</Link>
+            <Button className="bg-[#500000] text-white font-semibold hover:bg-[#400000] transition-colors" size="lg">
+              <Link to="/about" className="block w-full h-full">Learn More</Link>
             </Button>
           </div>
         </div>
