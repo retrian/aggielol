@@ -1,13 +1,16 @@
 // src/pages/Leaderboard.jsx
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useTheme } from '../lib/theme.jsx';            // ← NEW
+import { useTheme } from '../lib/theme.jsx';
+
+// Configure API base URL - use environment variable or fallback to Render URL
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://aggielol.onrender.com';
 
 /* ───────────────────────────────────────────────────── */
 
 export default function Leaderboard() {
   /* theme (so the page-wide gradient can flip) */
-  const { theme } = useTheme();                         // ← NEW
+  const { theme } = useTheme();
 
   /* view / data state */
   const [scope, setScope] = useState('current');        // 'current' | 'all'
@@ -28,12 +31,18 @@ export default function Leaderboard() {
     setLoadingRows(true);
     setErrorRows(null);
 
-    const url =
-      scope === 'all' ? '/api/leaderboard?scope=all' : '/api/leaderboard';
+    // Use full API URL instead of relative path
+    const url = scope === 'all' 
+      ? `${API_BASE_URL}/api/leaderboard?scope=all` 
+      : `${API_BASE_URL}/api/leaderboard`;
 
     axios.get(url)
       .then(res => { setRows(res.data); setLoadingRows(false); })
-      .catch(err => { console.error(err); setErrorRows('Failed to load leaderboard.'); setLoadingRows(false); });
+      .catch(err => { 
+        console.error('API Error:', err); 
+        setErrorRows('Failed to load leaderboard.'); 
+        setLoadingRows(false); 
+      });
   }, [scope]);
 
   /* helpers */
@@ -218,8 +227,7 @@ function EnhancedTableView({
                 `}
               >
                 {/* Card */}
-                <div className="relative p-8 rounded-3xl border border-gray-200 dark:[#31313c] backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all
-">
+                <div className="relative p-8 rounded-3xl border border-gray-200 dark:[#31313c] backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all">
                   {/* Rank badge */}
                   <div className={`${getRankBadge(i + 1)} absolute -top-4 -left-4 h-16 w-16 rounded-2xl flex items-center justify-center shadow-2xl transform -rotate-12 group-hover:rotate-0 transition-transform`}>
                     <span className="text-white text-2xl font-black">{i + 1}</span>
