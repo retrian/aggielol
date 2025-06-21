@@ -2,7 +2,6 @@
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';
 import cron from 'node-cron';
 import { pool } from './db/pool.js';
 import { syncAllAccounts } from './services/riotSync.js'; // adjust path if needed
@@ -14,17 +13,33 @@ import schoolYearsRouter from './routes/schoolYears.js';
 
 const app = express();
 
-// CORS configuration - allow your Vercel frontend
-app.use(cors({
-  origin: [
-    'https://aggielol.vercel.app',
-    'http://localhost:3000',  // for local development
-    'http://localhost:5173'   // for Vite dev server
-  ],
-  credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+// Manual CORS configuration
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  
+  // Allow main domain and any vercel preview
+  if (origin && (
+    origin === 'https://aggielol.vercel.app' ||
+    origin.includes('vercel.app') ||
+    origin.includes('localhost')
+  )) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+  }
+  
+  res.setHeader('Access-Control-Allow-Credentials', 'true');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  
+  // Handle preflight OPTIONS requests
+  if (req.method === 'OPTIONS') {
+    console.log('🔧 CORS preflight request from:', origin);
+    res.status(200).end();
+    return;
+  }
+  
+  console.log('🌐 Request from origin:', origin);
+  next();
+});
 
 app.use(express.json());
 
@@ -56,6 +71,15 @@ app.use('/api/players', playersRouter);
 app.use('/api/leaderboard', leaderboardRouter);
 
 app.get('/api/health', (_req, res) => res.send('OK'));
+
+app.get('/api/cors-test', (req, res) => {
+  console.log('🧪 CORS Test - Origin:', req.headers.origin);
+  res.json({ 
+    message: 'CORS test successful',
+    origin: req.headers.origin,
+    timestamp: new Date().toISOString()
+  });
+});
 
 const PORT = process.env.PORT || 4000;
 
