@@ -2,10 +2,10 @@
 
 import 'dotenv/config';
 import express from 'express';
-import cors from 'cors';           // ← NEW: cors middleware
+import cors from 'cors';
 import cron from 'node-cron';
 import { pool } from './db/pool.js';
-import { syncAllAccounts } from './services/riotSync.js';
+import { syncAllAccounts } from './services/riotSync.js'; // adjust path if needed
 import adminRouter from './routes/admin.js';
 import playersRouter from './routes/players.js';
 import teamsRouter from './routes/teams.js';
@@ -14,29 +14,17 @@ import schoolYearsRouter from './routes/schoolYears.js';
 
 const app = express();
 
-/* ───────────────────────────────────────────────────────────
- *  CORS — allow your Vercel site, preview URLs, and local dev
- * ─────────────────────────────────────────────────────────── */
-const allowedOrigins = [
-  'https://aggielol.vercel.app',  // production frontend
-  /\.vercel\.app$/,              // preview deployments
-  'http://localhost:5173',        // local Vite dev server
-];
-
-app.use(
-  cors({
-    origin: (origin, cb) => {
-      // allow requests with no origin (curl, Postman)
-      if (!origin) return cb(null, true);
-
-      const ok = allowedOrigins.some(o =>
-        typeof o === 'string' ? o === origin : o.test(origin)
-      );
-      return ok ? cb(null, true) : cb(new Error('Not allowed by CORS'));
-    },
-    credentials: false, // set to true only if you use cookies / auth headers
-  })
-);
+// CORS configuration - allow your Vercel frontend
+app.use(cors({
+  origin: [
+    'https://aggielol.vercel.app',
+    'http://localhost:3000',  // for local development
+    'http://localhost:5173'   // for Vite dev server
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 
 app.use(express.json());
 
@@ -45,7 +33,7 @@ if (!key) {
   console.error('⛔  RIOT_KEY is not set in the environment (.env)');
   process.exit(1);
 }
-// Print only the first 8 chars so you don’t leak the whole key
+// Print only the first 8 chars so you don't leak the whole key
 console.log('🔑 RIOT_KEY loaded:', key.slice(0, 8) + '…');
 
 // Log and verify DATABASE_URL
@@ -61,19 +49,17 @@ pool.connect()
     console.error('❌ Failed to connect to Postgres:', err);
   });
 
-/* ───────────────────────── API Routes ────────────────────── */
 app.use('/api/admin', adminRouter);
 app.use('/api/teams', teamsRouter);
 app.use('/api/school_years', schoolYearsRouter);
 app.use('/api/players', playersRouter);
 app.use('/api/leaderboard', leaderboardRouter);
 
-app.get('/api/health', (_req, res) => res.json({ ok: 'pong' }));
+app.get('/api/health', (_req, res) => res.send('OK'));
 
-/* ───────────────────────── Server Setup ──────────────────── */
 const PORT = process.env.PORT || 4000;
 
-// Prevent overlapping syncs
+// ── Prevent overlapping syncs ──────────────────────────────────────────────
 let isSyncing = false;
 
 // Run one sync on startup
