@@ -7,6 +7,16 @@
 @tailwind utilities;
 
 /* ------------------------------------------------------------------
+   Opt-out of Chrome "Force Dark" — declare supported schemes
+   ----------------------------------------------------------------- */
+@layer base {
+  /* Default (site ships light palette) */
+  html { color-scheme: light; }
+  /* When ThemeProvider toggles .dark on <html> */
+  html.dark { color-scheme: dark light; }
+}
+
+/* ------------------------------------------------------------------
    Utilities overrides for dark mode
    ----------------------------------------------------------------- */
 @layer utilities {
@@ -19,7 +29,7 @@
     color: #f9fafb !important;
   }
 
-  /* Catch common off-white backgrounds */
+  /* Catch common off‑white backgrounds */
   .dark .bg-gray-50 {
     background-color: #31313c !important; /* gray-900 */
     color: #f9fafb !important;
@@ -37,170 +47,65 @@
 }
 
 html, body {
-  overflow-x: hidden;              /* clip anything that sticks out */
+  overflow-x: hidden; /* clip anything that sticks out */
 }
-
 
 /* ------------------------------------------------------------------
-   Enhanced Mobile-Optimized Global Zoom Implementation
-   This section applies a global CSS transform to scale the entire page.
-   Be aware that this approach can affect how elements inside
-   (like Tailwind containers) behave and might require careful adjustment
-   of internal layout if unexpected white space appears.
+   Enhanced Mobile‑Optimised Global Zoom Implementation
    ----------------------------------------------------------------- */
-
-/* Base zoom for desktop: scales the entire page to 75% and adjusts size to fill viewport */
 html {
   transform: scale(0.75);
-  transform-origin: 0 0; /* Scale from the top-left corner */
-  width: 133.33%; /* Compensates for the scale: 100% / 0.75 */
-  height: 133.33%; /* Compensates for the scale */
-  overflow-x: hidden; /* Prevents horizontal scroll for the scaled content */
+  transform-origin: 0 0;
+  width: 133.33%;
+  height: 133.33%;
+  overflow-x: hidden;
 }
 
-/* Large tablets (1024px and down) - Adjusting scale and compensation */
-@media screen and (max-width: 1024px) {
-  html {
-    transform: scale(0.7);
-    width: 142.86%; /* 100% / 0.7 */
-    height: 142.86%;
-  }
+@media (max-width: 1024px) {
+  html { transform: scale(0.7);  width: 142.86%; height: 142.86%; }
+}
+@media (max-width: 768px)  {
+  html { transform: scale(0.6);  width: 166.67%; height: 166.67%; }
+}
+@media (max-width: 640px)  {
+  html { transform: scale(0.55); width: 181.82%; height: 181.82%; }
+}
+@media (max-width: 480px)  {
+  html { transform: scale(0.5);  width: 200%;    height: 200%;    }
+}
+@media (max-width: 360px)  {
+  html { transform: scale(0.45); width: 222.22%; height: 222.22%; }
 }
 
-/* Tablets and large phones (768px and down) - Aggressive scaling to fit */
-@media screen and (max-width: 768px) {
-  html {
-    transform: scale(0.6); /* Aggressive scaling for mobile */
-    width: 166.67%; /* 100% / 0.6 */
-    height: 166.67%;
-    overflow-x: hidden; /* Prevent horizontal scroll */
-  }
+/* Responsive typography tweaks after global scaling */
+@media (max-width: 768px) {
+  body { font-size: 0.85rem; line-height: 1.3; }
+  h1{font-size:1.8rem!important}h2{font-size:1.5rem!important}h3{font-size:1.3rem!important}
+  h4{font-size:1.1rem!important}h5{font-size:1rem!important}h6{font-size:0.9rem!important}
+  button{padding:0.4em 0.8em!important;font-size:0.85rem!important}
+  input,select,textarea{font-size:0.85rem!important;padding:0.4rem!important}
+}
+@media (max-width:480px){
+  body{font-size:0.75rem;line-height:1.2}
+  h1{font-size:1.5rem!important}h2{font-size:1.3rem!important}h3{font-size:1.1rem!important}
+  h4{font-size:1rem!important}h5{font-size:0.9rem!important}h6{font-size:0.8rem!important}
+  button{padding:0.3em 0.6em!important;font-size:0.75rem!important}
+  input,select,textarea{font-size:0.75rem!important;padding:0.3rem!important}
 }
 
-/* Mobile devices - Even more aggressive scaling */
-@media screen and (max-width: 640px) {
-  html {
-    transform: scale(0.55);
-    width: 181.82%; /* 100% / 0.55 */
-    height: 181.82%;
-    overflow-x: hidden;
-  }
-}
-
-/* Small mobile devices - Maximum compression */
-@media screen and (max-width: 480px) {
-  html {
-    transform: scale(0.5);
-    width: 200%; /* 100% / 0.5 */
-    height: 200%;
-    overflow-x: hidden;
-  }
-}
-
-/* Very small screens - Ultra compressed */
-@media screen and (max-width: 360px) {
-  html {
-    transform: scale(0.45);
-    width: 222.22%; /* 100% / 0.45 */
-    height: 222.22%;
-    overflow-x: hidden;
-  }
-}
-
-/*
-   The following media queries and styles for font-size, padding, margin, etc.
-   were originally intended to compensate for the global 'transform: scale()'.
-   With global scaling active, these specific adjustments might still be
-   necessary if Tailwind's responsive utilities don't achieve the desired
-   visual size after the global scaling.
-*/
-@media screen and (max-width: 768px) {
-  /* Make all text smaller on mobile */
-  body {
-    font-size: 0.85rem; /* Smaller base font size */
-    line-height: 1.3;
-  }
-
-  h1 { font-size: 1.8rem !important; }
-  h2 { font-size: 1.5rem !important; }
-  h3 { font-size: 1.3rem !important; }
-  h4 { font-size: 1.1rem !important; }
-  h5 { font-size: 1rem !important; }
-  h6 { font-size: 0.9rem !important; }
-
-  /* Smaller buttons and inputs */
-  button {
-    padding: 0.4em 0.8em !important;
-    font-size: 0.85rem !important;
-  }
-
-  input, select, textarea {
-    font-size: 0.85rem !important;
-    padding: 0.4rem !important;
-  }
-
-  /* Smaller spacing for mobile */
-  .p-4 { padding: 0.75rem !important; }
-  .p-6 { padding: 1rem !important; }
-  .p-8 { padding: 1.25rem !important; }
-  .m-4 { margin: 0.75rem !important; }
-  .m-6 { margin: 1rem !important; }
-  .m-8 { margin: 1.25rem !important; }
-}
-
-@media screen and (max-width: 480px) {
-  /* Even smaller text for small screens */
-  body {
-    font-size: 0.75rem;
-    line-height: 1.2;
-  }
-
-  h1 { font-size: 1.5rem !important; }
-  h2 { font-size: 1.3rem !important; }
-  h3 { font-size: 1.1rem !important; }
-  h4 { font-size: 1rem !important; }
-  h5 { font-size: 0.9rem !important; }
-  h6 { font-size: 0.8rem !important; }
-
-  button {
-    padding: 0.3em 0.6em !important;
-    font-size: 0.75rem !important;
-  }
-
-  input, select, textarea {
-    font-size: 0.75rem !important;
-    padding: 0.3rem !important;
-  }
-}
-
-/* Fix for potential scrolling issues on mobile */
-@media screen and (max-width: 768px) {
-  body {
-    -webkit-overflow-scrolling: touch; /* Smooth scrolling on iOS */
-    overflow-x: hidden; /* Prevent horizontal scrolling */
-  }
-
-  /* Ensure proper mobile layout */
-  * {
-    box-sizing: border-box;
-  }
-
-  /* Make sure content fits within viewport */
-  #root {
-    width: 100%;
-    max-width: 100vw;
-    overflow-x: hidden;
-  }
+@media (max-width: 768px) {
+  body{ -webkit-overflow-scrolling: touch; overflow-x:hidden; }
+  *{ box-sizing:border-box; }
+  #root{ width:100%; max-width:100vw; overflow-x:hidden; }
 }
 
 /* ------------------------------------------------------------------
    Global browser defaults
-   ------------------------------------------------------------------ */
+   ----------------------------------------------------------------- */
 :root {
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
@@ -211,34 +116,26 @@ body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  /* Ensure no horizontal overflow from body/html itself */
-  overflow-x: hidden; /* Added for consistency */
+  overflow-x: hidden;
 }
 
-/* Links & sample button styles */
-a           { @apply font-medium text-indigo-400 no-underline; }
-a:hover     { @apply text-indigo-300; }
+a{ @apply font-medium text-indigo-400 no-underline; }
+a:hover{ @apply text-indigo-300; }
 
-h1 { font-size: 3.2em; line-height: 1.1; }
+h1{ font-size:3.2em; line-height:1.1; }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
+button{
+  border-radius:8px; border:1px solid transparent;
+  padding:0.6em 1.2em; font-size:1em; font-weight:500;
+  font-family:inherit; background:#1a1a1a; cursor:pointer;
+  transition:border-color .25s;
 }
-button:hover          { border-color: #646cff; }
-button:focus,
-button:focus-visible  { outline: 4px auto -webkit-focus-ring-color; }
+button:hover{ border-color:#646cff; }
+button:focus,button:focus-visible{ outline:4px auto -webkit-focus-ring-color; }
 
 /* ------------------------------------------------------------------
-   Your HSL design tokens (unchanged)
-   ------------------------------------------------------------------ */
+   HSL design tokens (unchanged) + dark variants
+   ----------------------------------------------------------------- */
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -247,79 +144,40 @@ button:focus-visible  { outline: 4px auto -webkit-focus-ring-color; }
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --primary: 0 0% 9%; --primary-foreground: 0 0% 98%;
+    --secondary: 0 0% 96.1%; --secondary-foreground: 0 0% 9%;
+    --muted: 0 0% 96.1%; --muted-foreground: 0 0% 45.1%;
+    --accent: 0 0% 96.1%; --accent-foreground: 0 0% 9%;
+    --destructive: 0 84.2% 60.2%; --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 89.8%; --input: 0 0% 89.8%; --ring: 0 0% 3.9%;
+    --chart-1: 12 76% 61%; --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%; --chart-4: 43 74% 66%; --chart-5: 27 87% 67%;
     --radius: 0.5rem;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --background: 0 0% 3.9%; --foreground: 0 0% 98%;
+    --card: 0 0% 3.9%; --card-foreground: 0 0% 98%;
+    --popover: 0 0% 3.9%; --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%; --primary-foreground: 0 0% 9%;
+    --secondary: 0 0% 14.9%; --secondary-foreground: 0 0% 98%;
+    --muted: 0 0% 14.9%; --muted-foreground: 0 0% 63.9%;
+    --accent: 0 0% 14.9%; --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%; --destructive-foreground: 0 0% 98%;
+    --border: 0 0% 14.9%; --input: 0 0% 14.9%; --ring: 0 0% 83.1%;
+    --chart-1: 220 70% 50%; --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%; --chart-4: 280 65% 60%; --chart-5: 340 75% 55%;
   }
 }
 
 /* ------------------------------------------------------------------
-   🔥  The actual light ↔ dark canvas switch
-   ------------------------------------------------------------------ */
+   Canvas switch using Tailwind @apply
+   ----------------------------------------------------------------- */
 @layer base {
-  /* Default light mode */
-  html {
-    @apply bg-white text-gray-900 antialiased;
-  }
-
-  /* When ThemeProvider adds .dark to <html> */
-  html.dark {
-    @apply bg-gray-800 text-gray-100;
-  }
-
-  /* Ensure background fills viewport on every page */
-  body,
-  #root {
-    @apply min-h-screen;
-  }
-
-  /* Cards and popovers use HSL tokens for bg/fg */
-  .card,
-  .card-content,
-  .popover {
-    background-color: hsl(var(--card)) !important;
-    color:            hsl(var(--card-foreground)) !important;
+  html{@apply bg-white text-gray-900 antialiased;}
+  html.dark{@apply bg-gray-800 text-gray-100;}
+  body,#root{@apply min-h-screen;}
+  .card,.card-content,.popover{
+    background-color:hsl(var(--card))!important;
+    color:hsl(var(--card-foreground))!important;
   }
 }

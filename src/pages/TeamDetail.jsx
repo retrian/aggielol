@@ -1,14 +1,22 @@
 /* ───────────────────────────────────────────────────────────
  * src/pages/TeamDetail.jsx — Enhanced UI/UX with dynamic theming
+ * (now uses a configurable API_BASE_URL, just like Leaderboard)
  * ───────────────────────────────────────────────────────────
  */
 
 import { useLayoutEffect, useState, useEffect, useMemo } from "react";
 import { useParams, Link } from "react-router-dom";
-import { ChevronLeft, Calendar, Trophy, Star, TrendingUp, Users, Gamepad2 } from "lucide-react";
+import {
+  ChevronLeft, Calendar, Trophy, Star,
+  TrendingUp, Users, Gamepad2
+} from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-/* ── 1 ▪ Dynamic Configuration ─────────────────────────────── */
+/* ——— 0 ▪ API base URL (new) ———————————————————————— */
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "https://aggielol.onrender.com";
+
+/* ——— 1 ▪ Dynamic Configuration ———————————————————— */
 const GAME_CONFIG = {
   tiers: [
     "IRON", "BRONZE", "SILVER", "GOLD",
@@ -17,60 +25,45 @@ const GAME_CONFIG = {
   ],
   divisions: ["IV", "III", "II", "I"],
   roles: {
-    Top: {gradient: "from-blue-500 to-blue-700", color: "blue" },
-    Jungle: {gradient: "from-green-500 to-green-700", color: "green" },
-    Mid: {gradient: "from-yellow-500 to-yellow-700", color: "yellow" },
-    ADC: {gradient: "from-red-500 to-red-700", color: "red" },
-    Support: {gradient: "from-purple-500 to-purple-700", color: "purple" }
+    Top:     { gradient: "from-blue-500 to-blue-700",   color: "blue"   },
+    Jungle:  { gradient: "from-green-500 to-green-700", color: "green"  },
+    Mid:     { gradient: "from-yellow-500 to-yellow-700", color: "yellow" },
+    ADC:     { gradient: "from-red-500 to-red-700",     color: "red"    },
+    Support: { gradient: "from-purple-500 to-purple-700", color: "purple" }
   },
   roleOrder: ["Top", "Jungle", "Mid", "ADC", "Support"]
 };
 
 const THEME_CONFIG = {
   animations: {
-    duration: {
-      fast: 0.2,
-      normal: 0.3,
-      slow: 0.5,
-      hero: 0.8
-    },
-    spring: {
-      type: "spring",
-      stiffness: 300,
-      damping: 30
-    },
-    stagger: {
-      container: 0.07,
-      delay: 0.2
-    }
+    duration: { fast: 0.2, normal: 0.3, slow: 0.5, hero: 0.8 },
+    spring:   { type: "spring", stiffness: 300, damping: 30 },
+    stagger:  { container: 0.07, delay: 0.2 }
   },
   gradients: {
     primary: "from-gray-900 via-black to-black",
-    hero: "from-black via-red-900/60 to-red-800/30",
-    card: "from-gray-800/60 to-gray-900/90",
-    accent: "from-red-600 to-red-700" // Default, overwritten by team theme
+    hero:    "from-black via-red-900/60 to-red-800/30",
+    card:    "from-gray-800/60 to-gray-900/90",
+    accent:  "from-red-600 to-red-700"
   }
 };
 
-/* ── 2 ▪ Utility Functions ────────────────────────────────── */
+/* ——— 2 ▪ Utility Functions —————————————————————— */
 const calculateRankValue = (tier, division, lp = 0) => {
   if (!tier) return 0;
   const tierIndex = GAME_CONFIG.tiers.indexOf(tier?.toUpperCase());
   if (tierIndex === -1) return 0;
-
   const base = tierIndex * 400;
   const divisionIndex = GAME_CONFIG.divisions.indexOf(division);
   const divAdd = divisionIndex !== -1 ? divisionIndex * 100 : 0;
-  return base + divAdd + (lp || 0);
+  return base + divAdd + lp;
 };
 
 const getRankLabel = (value) => {
   const tierIndex = Math.floor(value / 400);
   const tier = GAME_CONFIG.tiers[tierIndex] ?? "UNRANKED";
-
   if (tierIndex <= GAME_CONFIG.tiers.indexOf("DIAMOND")) {
     const divIndex = Math.floor((value % 400) / 100);
-    // Ensure divIndex is valid before accessing GAME_CONFIG.divisions
     if (GAME_CONFIG.divisions[divIndex]) {
       return `${tier} ${GAME_CONFIG.divisions[divIndex]}`;
     }
@@ -79,30 +72,30 @@ const getRankLabel = (value) => {
 };
 
 const generateTeamTheme = (teamName) => {
-  if (!teamName) return { gradient: "from-gray-600 to-gray-800", border: "border-gray-400/40", accent: "red" };
+  if (!teamName)
+    return { gradient: "from-gray-600 to-gray-800", border: "border-gray-400/40", accent: "red" };
 
   const colorMap = {
-    maroon: { gradient: "from-red-600 to-red-800", border: "border-red-400/40", accent: "red" },
-    white: { gradient: "from-gray-100 to-gray-300", border: "border-gray-400/40", accent: "gray" },
-    black: { gradient: "from-gray-800 to-black", border: "border-blue-400/40", accent: "blue" }, // Changed black border to blue to match accent
-    gray: { gradient: "from-gray-500 to-gray-700", border: "border-gray-400/40", accent: "gray" },
-    blue: { gradient: "from-blue-600 to-blue-800", border: "border-blue-400/40", accent: "blue" },
-    green: { gradient: "from-green-600 to-green-800", border: "border-green-400/40", accent: "green" },
-    purple: { gradient: "from-purple-600 to-purple-800", border: "border-purple-400/40", accent: "purple" },
-    gold: { gradient: "from-yellow-600 to-yellow-800", border: "border-yellow-400/40", accent: "yellow" },
-    orange: { gradient: "from-orange-600 to-orange-800", border: "border-orange-400/40", accent: "orange" }
+    maroon:  { gradient: "from-red-600 to-red-800",     border: "border-red-400/40",     accent: "red"    },
+    white:   { gradient: "from-gray-100 to-gray-300",   border: "border-gray-400/40",    accent: "gray"   },
+    black:   { gradient: "from-gray-800 to-black",      border: "border-blue-400/40",    accent: "blue"   },
+    gray:    { gradient: "from-gray-500 to-gray-700",   border: "border-gray-400/40",    accent: "gray"   },
+    blue:    { gradient: "from-blue-600 to-blue-800",   border: "border-blue-400/40",    accent: "blue"   },
+    green:   { gradient: "from-green-600 to-green-800", border: "border-green-400/40",   accent: "green"  },
+    purple:  { gradient: "from-purple-600 to-purple-800", border: "border-purple-400/40", accent: "purple" },
+    gold:    { gradient: "from-yellow-600 to-yellow-800", border: "border-yellow-400/40", accent: "yellow" },
+    orange:  { gradient: "from-orange-600 to-orange-800", border: "border-orange-400/40", accent: "orange" }
   };
 
-  const lowerName = teamName.toLowerCase();
-  return colorMap[lowerName] || { gradient: "from-red-600 to-red-800", border: "border-red-400/40", accent: "red" };
+  const lower = teamName.toLowerCase();
+  return colorMap[lower] || colorMap.maroon;
 };
 
-const getPlayerIconUrl = (iconId) => {
-  const cdnVersion = "15.11.1"; // Could be made dynamic from API
-  return `https://ddragon.leagueoflegends.com/cdn/${cdnVersion}/img/profileicon/${iconId}.png`;
-};
+const getPlayerIconUrl = (id) =>
+  `https://ddragon.leagueoflegends.com/cdn/15.12.1/img/profileicon/${id}.png`;
 
-const getTierImageUrl = (tier) => `/images/${tier?.toUpperCase()}_SMALL.jpg`;
+const getTierImageUrl = (tier) =>
+  `/images/${tier?.toUpperCase()}_SMALL.jpg`;
 
 /* ── 3 ▪ Enhanced UI Components ───────────────────────────── */
 const PlayerCard = ({ player, rank, isStarter = true, teamTheme }) => {
@@ -668,13 +661,14 @@ const Loading = ({ text = "Loading..." }) => (
 /* ── 4 ▪ Main TeamDetail Component ────────────────────────── */
 export default function TeamDetail() {
   const { slug } = useParams();
-  const [data, setData] = useState(null);
+  const [data, setData]       = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError]     = useState(null);
   const [activeTab, setActiveTab] = useState("overview");
 
-  const teamTheme = useMemo(() =>
-    generateTeamTheme(data?.team?.name), [data?.team?.name]
+  const teamTheme = useMemo(
+    () => generateTeamTheme(data?.team?.name),
+    [data?.team?.name]
   );
 
   useLayoutEffect(() => {
@@ -688,37 +682,32 @@ export default function TeamDetail() {
       try {
         setLoading(true);
         setError(null);
-        const res = await fetch(`/api/teams/${slug}`);
+
+        /* NEW: use full URL with API_BASE_URL */
+        const res = await fetch(`${API_BASE_URL}/api/teams/${slug}`);
+
         if (!res.ok) {
-          const errorText = await res.text();
-          throw new Error(`HTTP Error: ${res.status} - ${errorText || res.statusText}`);
+          const msg = await res.text();
+          throw new Error(`HTTP ${res.status} – ${msg || res.statusText}`);
         }
+
         const json = await res.json();
-        if (mounted) {
-          setData(json);
-        }
+        if (mounted) setData(json);
       } catch (e) {
         console.error("Failed to fetch team data:", e);
-        if (mounted) {
-          setError(e);
-        }
+        if (mounted) setError(e);
       } finally {
-        if (mounted) {
-          setLoading(false);
-        }
+        if (mounted) setLoading(false);
       }
     };
 
     fetchTeamData();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, [slug]);
 
   if (loading) return <Loading text="Summoning team data..." />;
-  if (error) return <Loading text={`Error: ${error.message}. Please try again.`} />;
-  if (!data) return <Loading text="Team not found, check the scroll!" />;
+  if (error)   return <Loading text={`Error: ${error.message}`} />;
+  if (!data)   return <Loading text="Team not found." />;
 
   /* normalise data */
   const { team, season, roster = [], matches = [] } = data;

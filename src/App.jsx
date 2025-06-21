@@ -13,14 +13,12 @@ import About       from "./pages/About";
 
 import TeamDetail      from "./pages/TeamDetail";
 import PlayerProfile   from "./pages/PlayerProfile";
-import ApiTest from "./pages/ApiTest";
 
 export default function App() {
   return (
     <>
       <NavBar />
       <Routes>
-        <Route path="/apitest" element={<ApiTest />} />
         <Route path="/"              element={<Home />} />
         <Route path="/teams"         element={<Teams />} />
         <Route path="/teams/:slug"   element={<TeamDetail />} /> 
