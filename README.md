@@ -33,7 +33,7 @@ AggieTracker is a web application for managing and displaying information relate
     * Host: localhost:5432
     * Database: aggielol
     * User: tamu\_user
-    * Password: \[*Provide your SQL Password here*]
+    * Password: 
 2.  **Run Frontend (Vite Dev Server)**
 
     ```bash
