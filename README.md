@@ -2,7 +2,7 @@
 
 ## Description
 
-AggieTracker is a web application for managing and displaying information related to Texas A&M University's League of Legends teams. It includes features for viewing team rosters, player profiles, leaderboards, schedules, and live streams. The application is built with a modern JavaScript stack and deployed on cloud platforms.
+AggieTracker is a web application for managing and displaying information related to Texas A&M University's League of Legends teams. It includes features for viewing team rosters, player profiles, leaderboards, schedules, and live streams. The application is built with a modern JavaScript stack and deployed on cloud platforms. There's a way to get my logins to the database, I beg do not touch ;;.
 
 **For more detailed information, please refer to the [AggieTracker Master Document](https://docs.google.com/document/d/11LkL_qlVZ-wguEkPUGIYEaqeXn5BzDmreC7mG9OVxyI/edit?usp=sharing).**
 
