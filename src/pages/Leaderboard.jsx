@@ -280,7 +280,7 @@ function EnhancedTableView({
                     {/* Stats box */}
                     <div className="bg-whithe p-4 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3">
                       <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Record</span><span className="font-bold">{wins}W&nbsp;-&nbsp;{losses}L</span></div>
-                      <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Win Rate</span><span className={`px-3 py-1 rounded-full text-sm font-bold border ${getWinRateColor(wlRate)}`}>{wlRate}</span></div>
+                      <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Win Rate</span><span className={`px-3 py-1 rounded-full text-sm font-bold border ${getWinRateColor(wlRate)} dark:bg-gray-900 dark:border-gray-700`}>{wlRate}</span></div>
                       <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Games</span><span className="font-semibold">{wins + losses}</span></div>
                     </div>
                   </div>
