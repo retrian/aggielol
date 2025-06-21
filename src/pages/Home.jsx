@@ -73,7 +73,7 @@ export default function Home() {
               <Link to="/teams" className="block w-full h-full">Get Started</Link>
             </Button>
             <Button className="bg-black text-white font-bold hover:bg-[#400000] transition-colors" size="lg">
-              <a href="https://discord.gg/aggielol" target="_blank" rel="noopener noreferrer" className="block w-full h-full">
+              <a href="https://discord.com/invite/tamuesports" target="_blank" rel="noopener noreferrer" className="block w-full h-full">
                 Join Discord
               </a>
             </Button>

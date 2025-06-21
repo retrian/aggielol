@@ -202,7 +202,7 @@ export default function About() {
                 asChild
               >
                 <a
-                  href="https://discord.gg/aggielol"
+                  href="https://discord.com/invite/tamuesports"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
