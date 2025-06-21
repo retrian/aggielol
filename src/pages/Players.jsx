@@ -48,7 +48,7 @@ export default function Players() {
      1.  Fetch list of seasons
   ================================================================== */
   useEffect(() => {
-    fetch("/api/school_years")
+    fetch("https://aggielol.onrender.com/api/school_years")
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
@@ -77,7 +77,7 @@ export default function Players() {
 
     Promise.all(
       yearList.map((yr) =>
-        fetch(`/api/players?year=${encodeURIComponent(yr)}`)
+        fetch(`https://aggielol.onrender.com/api/players?year=${encodeURIComponent(yr)}`)
           .then((r) => (r.ok ? r.json() : []))
           .catch(() => [])
       )
@@ -104,7 +104,7 @@ export default function Players() {
     setLoadingRoster(true);
     setError(null);
 
-    fetch(`/api/players?year=${encodeURIComponent(selectedYear)}`)
+    fetch(`https://aggielol.onrender.com/api/players?year=${encodeURIComponent(selectedYear)}`)
       .then((r) => {
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         return r.json();
