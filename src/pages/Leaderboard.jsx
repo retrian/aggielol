@@ -112,7 +112,7 @@ export default function Leaderboard() {
             LEADERBOARD
           </h1>
           <p className="text-gray-600 dark:text-gray-400 text-lg max-w-2xl mx-auto">
-            The best players apart of Texas A&M University
+            The best players a part of Texas A&M University
           </p>
         </div>
 
