@@ -1,7 +1,7 @@
 // backend/services/riotSync.js
 // ---------------------------------------------------------------------------
 // Pull current Riot-ID + solo-queue data for every account in riot_accounts
-// and store a snapshot in league_entries.  Runs in 20-account batches.
+// and store a snapshot in league_entries.  Runs in 10-account batches.
 // ---------------------------------------------------------------------------
 
 import axios from 'axios';
@@ -20,7 +20,7 @@ const riotNA = axios.create({
 });
 
 /* ───── Batch helpers ─────────────────────────────────────────────────── */
-const BATCH_SIZE       = 20;
+const BATCH_SIZE       = 10;
 const BATCH_PAUSE_MS   = 5 * 60 * 1000; // 5 minutes
 const REQUEST_DELAY_MS = 500;           // 0.5 s
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));

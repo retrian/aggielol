@@ -4,7 +4,7 @@ import 'dotenv/config';
 import express from 'express';
 import cron from 'node-cron';
 import { pool } from './db/pool.js';
-import { syncAllAccounts } from './services/riotSync.js'; // adjust path if needed
+import { syncAllAccounts } from './services/riotSync.js';
 import adminRouter from './routes/admin.js';
 import playersRouter from './routes/players.js';
 import teamsRouter from './routes/teams.js';
