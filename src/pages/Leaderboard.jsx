@@ -212,7 +212,7 @@ function EnhancedTableView({
             const wlRate = winRate(wins, losses);
             const iconId = row.profile_icon_id ?? row.icon_id;
             const icon   = iconId
-              ? `https://ddragon.leagueoflegends.com/cdn/15.11.1/img/profileicon/${iconId}.png`
+              ? `https://ddragon.leagueoflegends.com/cdn/15.13.1/img/profileicon/${iconId}.png`
               : null;
             const tierImg = row.tier
               ? `/images/${row.tier.toUpperCase()}_SMALL.jpg`
@@ -303,7 +303,7 @@ function EnhancedTableView({
         const wlRate = winRate(wins, losses);
         const iconId = row.profile_icon_id ?? row.icon_id;
         const icon = iconId
-          ? `https://ddragon.leagueoflegends.com/cdn/15.11.1/img/profileicon/${iconId}.png`
+          ? `https://ddragon.leagueoflegends.com/cdn/15.13.1/img/profileicon/${iconId}.png`
           : null;
         const tierImg = row.tier
           ? `/images/${row.tier.toUpperCase()}_SMALL.jpg`
