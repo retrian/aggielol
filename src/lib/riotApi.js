@@ -84,4 +84,4 @@ export const getLeagueInfo   = summonerId =>
 
 /* ---------- 4 · CDN helper ----------------------------------------------- */
 export const profileIconUrl = iconId =>
-  `https://ddragon.leagueoflegends.com/cdn/${version}/img/profileicon/${iconId}.png`;
+  `https://ddragon.leagueoflegends.com/cdn/15.13.1/img/profileicon/${iconId}.png`;
