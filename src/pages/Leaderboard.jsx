@@ -227,7 +227,7 @@ function EnhancedTableView({
                 `}
               >
                 {/* Card */}
-                <div className="relative p-8 rounded-3xl border border-gray-200 dark:[#31313c] backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all">
+                <div className="relative p-8 rounded-3xl border border-gray-200 dark:bg-[#31313c] backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all">
                   {/* Rank badge */}
                   <div className={`${getRankBadge(i + 1)} absolute -top-4 -left-4 h-16 w-16 rounded-2xl flex items-center justify-center shadow-2xl transform -rotate-12 group-hover:rotate-0 transition-transform`}>
                     <span className="text-white text-2xl font-black">{i + 1}</span>
