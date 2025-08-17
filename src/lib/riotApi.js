@@ -15,7 +15,7 @@ if (typeof process !== 'undefined' && process.env.RIOT_API_KEY) {
 }
 
 /* ---------- 1 · Constants -------------------------------------------------- */
-const version = '15.10.1';   // Data-Dragon version for profile icons
+const version = '15.16.1';   // Data-Dragon version for profile icons
 
 export const tierOrder = {
   challenger: 0, grandmaster: 1, master: 2, diamond: 3, emerald: 4,
@@ -84,4 +84,4 @@ export const getLeagueInfo   = summonerId =>
 
 /* ---------- 4 · CDN helper ----------------------------------------------- */
 export const profileIconUrl = iconId =>
-  `https://ddragon.leagueoflegends.com/cdn/15.13.1/img/profileicon/${iconId}.png`;
+  `https://ddragon.leagueoflegends.com/cdn/15.16.1/img/profileicon/${iconId}.png`;
