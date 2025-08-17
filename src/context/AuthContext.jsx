@@ -9,14 +9,13 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(
-    () =>
-      onAuthStateChanged(auth, u => {
-        setUser(u);
-        setLoading(false);
-      }),
-    []
-  );
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+    return unsubscribe;
+  }, []);
 
   return (
     <AuthContext.Provider value={{ user, loading }}>
