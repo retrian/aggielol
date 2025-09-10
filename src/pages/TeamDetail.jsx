@@ -92,7 +92,7 @@ const generateTeamTheme = (teamName) => {
 };
 
 const getPlayerIconUrl = (id) =>
-  `https://ddragon.leagueoflegends.com/cdn/15.16.1/img/profileicon/${id}.png`;
+  `https://ddragon.leagueoflegends.com/cdn/15.18.1/img/profileicon/${id}.png`;
 
 const getTierImageUrl = (tier) =>
   `/images/${tier?.toUpperCase()}_SMALL.jpg`;
