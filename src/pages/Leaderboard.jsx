@@ -70,11 +70,17 @@ export default function Leaderboard() {
   }[r] || 'bg-gradient-to-br from-slate-600 via-slate-700 to-slate-800 shadow-slate-600/30');
 
   const getWinRateColor = wr => {
-    const r=parseInt(wr,10);
-    if (r>=70) return 'text-emerald-600 bg-emerald-50  dark:bg-emerald-900/20 border-emerald-200  dark:border-emerald-800';
-    if (r>=60) return 'text-blue-600   bg-blue-50     dark:bg-blue-900/20    border-blue-200   dark:border-blue-800';
-    if (r>=50) return 'text-purple-600 bg-purple-50   dark:bg-purple-900/20  border-purple-200 dark:border-purple-800';
-    return          'text-red-600    bg-red-50       dark:bg-red-900/20     border-red-200    dark:border-red-800';
+    const r = parseInt(wr, 10);
+    if (r >= 70) {
+      return 'text-emerald-600 dark:text-emerald-300 bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800';
+    }
+    if (r >= 60) {
+      return 'text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800';
+    }
+    if (r >= 50) {
+      return 'text-purple-600 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800';
+    }
+    return 'text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800';
   };
 
   const getTierGradient = t => ({
@@ -280,7 +286,7 @@ function EnhancedTableView({
                     {/* Stats box */}
                     <div className="bg-whithe p-4 rounded-2xl border border-gray-200 dark:border-gray-700 space-y-3">
                       <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Record</span><span className="font-bold">{wins}W&nbsp;-&nbsp;{losses}L</span></div>
-                      <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Win Rate</span><span className={`px-3 py-1 rounded-full text-sm font-bold border ${getWinRateColor(wlRate)} dark:!bg-gray-900 dark:!border-gray-700`}>{wlRate}</span></div>
+                      <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Win Rate</span><span className={`px-3 py-1 rounded-full text-sm font-bold border ${getWinRateColor(wlRate)}`}>{wlRate}</span></div>
                       <div className="flex justify-between"><span className="text-sm text-gray-600 dark:text-gray-400">Games</span><span className="font-semibold">{wins + losses}</span></div>
                     </div>
                   </div>
