@@ -54,27 +54,25 @@ html, body {
    Enhanced Mobile‑Optimised Global Zoom Implementation
    ----------------------------------------------------------------- */
 html {
-  transform: scale(0.75);
+  zoom: 0.75;              /* preserve overall size without blurry transform */
   transform-origin: 0 0;
-  width: 133.33%;
-  height: 133.33%;
   overflow-x: hidden;
 }
 
 @media (max-width: 1024px) {
-  html { transform: scale(0.7);  width: 142.86%; height: 142.86%; }
+  html { zoom: 0.7; }
 }
-@media (max-width: 768px)  {
-  html { transform: scale(0.6);  width: 166.67%; height: 166.67%; }
+@media (max-width: 768px) {
+  html { zoom: 0.6; }
 }
-@media (max-width: 640px)  {
-  html { transform: scale(0.55); width: 181.82%; height: 181.82%; }
+@media (max-width: 640px) {
+  html { zoom: 0.55; }
 }
-@media (max-width: 480px)  {
-  html { transform: scale(0.5);  width: 200%;    height: 200%;    }
+@media (max-width: 480px) {
+  html { zoom: 0.5; }
 }
-@media (max-width: 360px)  {
-  html { transform: scale(0.45); width: 222.22%; height: 222.22%; }
+@media (max-width: 360px) {
+  html { zoom: 0.45; }
 }
 
 /* Responsive typography tweaks after global scaling */
